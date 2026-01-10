@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Language | The Future of Scripting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent: #00d4ff;
+            --text: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text);
+            overflow-x: hidden;
+            background: #0a0a0a;
+        }
+
+        .bg-container {
+            fixed: fixed;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('main.avif') no-repeat center center/cover;
+            z-index: -2;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            z-index: -1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: scale(1.01);
+        }
+
+        header {
+            text-align: center;
+            padding: 100px 0 50px;
+        }
+
+        header h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            border-left: 4px solid var(--accent);
+            margin: 20px 0;
+        }
+
+        code { color: #00ffcc; }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .feature-item h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 20px var(--accent);
+            transform: translateY(-3px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-container"></div>
+    <div class="bg-overlay"></div>
+
+    <header class="animate">
+        <h1>NEXUS</h1>
+        <p>A Powerful, Simplified Programming Language Running on Python & C++</p>
+        <a href="#setup" class="btn">Get Started</a>
+    </header>
+
+    <div class="container">
+        
+        <section class="glass-card animate" style="animation-delay: 0.2s;">
+            <h2>The Vision</h2>
+            <p>Nexus is designed to bridge the gap between Python's simplicity and C++'s performance. With a refined <code>set</code> and <code>fn</code> syntax, it provides an intuitive way to build GUI apps, system tools, and network scripts.</p>
+        </section>
+
+        <section id="setup" class="glass-card animate" style="animation-delay: 0.4s;">
+            <h2>How to Run Nexus</h2>
+            <p>Running your first <code>.nx</code> file is easy. Follow these steps:</p>
+            <ol style="margin: 20px; line-height: 2;">
+                <li>Ensure <strong>Python 3.x</strong> is installed.</li>
+                <li>Save the Nexus Interpreter as <code>interpreter.py</code>.</li>
+                <li>Create a file named <code>app.nx</code>.</li>
+                <li>Open your terminal and type:</li>
+            </ol>
+            <pre><code>python3 interpreter.py app.nx</code></pre>
+        </section>
+
+        <section class="glass-card animate" style="animation-delay: 0.6s;">
+            <h2>Nexus Syntax</h2>
+            <p>Clean, readable, and powerful.</p>
+            <pre><code># Create a variable
+set greeting = "Hello Nexus World"
+
+# Define a function
+fn welcome_user()
+    out greeting
+    gui.msg("Welcome to the Glass Interface!")
+end
+
+# Logic and GUI
+if OS == "Linux"
+    welcome_user()
+    gui.window("Nexus v0.6")
+    gui.run()
+end</code></pre>
+        </section>
+
+        <section class="glass-card animate" style="animation-delay: 0.8s;">
+            <h2 style="margin-bottom: 20px;">Documentation: 50+ Features</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <span class="tag">CORE</span>
+                    <h3>Logic & Variables</h3>
+                    <p><code>set</code>, <code>fn</code>, <code>if</code>, <code>else</code>, <code>loop</code>, <code>wait</code>, <code>return</code>, <code>input</code>, <code>end</code>, <code>// comments</code>.</p>
+                </div>
+
+                <div class="feature-item">
+                    <span class="tag">SYSTEM</span>
+                    <h3>OS & Shell</h3>
+                    <p><code>sys.shell()</code>, <code>sys.info()</code>, <code>sys.exit()</code>, <code>sys.user()</code>, <code>sys.arch()</code>, <code>env.get()</code>, <code>sys.args()</code>.</p>
+                </div>
+
+                <div class="feature-item">
+                    <span class="tag">GUI</span>
+                    <h3>Interface Builder</h3>
+                    <p><code>gui.window()</code>, <code>gui.label()</code>, <code>gui.button()</code>, <code>gui.entry()</code>, <code>gui.msg()</code>, <code>gui.color()</code>, <code>gui.run()</code>.</p>
+                </div>
+
+                <div class="feature-item">
+                    <span class="tag">IO / NET</span>
+                    <h3>Data & Web</h3>
+                    <p><code>io.write()</code>, <code>io.read()</code>, <code>io.exists()</code>, <code>net.get()</code>, <code>net.ip()</code>, <code>json.parse()</code>, <code>io.copy()</code>.</p>
+                </div>
+
+                <div class="feature-item">
+                    <span class="tag">MATH</span>
+                    <h3>Calculations</h3>
+                    <p><code>math.rand()</code>, <code>math.sqrt()</code>, <code>math.pi</code>, <code>math.round()</code>, <code>math.sin()</code>, <code>math.abs()</code>.</p>
+                </div>
+
+                <div class="feature-item">
+                    <span class="tag">UTILITIES</span>
+                    <h3>Strings & Time</h3>
+                    <p><code>str.upper()</code>, <code>str.lower()</code>, <code>str.len()</code>, <code>time.now()</code>, <code>time.date()</code>, <code>str.split()</code>.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; Tiwut. <br> Powered by Python & Titanium Logic.</p>
+        <a href="https://tiwut.de/cookie-banner-information.html" style="color: #a0a0a0; text-decoration: none; font-size: 0.8rem;">Legal Notice</a>
+    </footer>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        });
+
+        document.querySelectorAll('.glass-card').forEach((card) => {
+            observer.observe(card);
+        });
+    </script>
+    <script data-goatcounter="https://tiwut.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+    <script src="https://tiwut.de/Script/enforce_https.js" defer></script>
+    <script src="cookie.notice.js"></script>
+
+</body>
+</html>
