@@ -1,0 +1,32 @@
+set username = "Developer"
+set welcome_msg = "Welcome to Nexus Titan, " + username
+out welcome_msg
+
+set base_value = 100
+set bonus = 50
+set total_score = base_value + bonus
+out "Calculating Score..."
+out "Base: 100, Bonus: 50"
+out "Total Score is: " + total_score
+
+out "--- System Analysis ---"
+sys.info()
+out "Listing files in current directory:"
+sys.shell("ls -l")
+
+fn run_diagnostic()
+    out "Starting Diagnostic Function..."
+    out "System Status: Green"
+    out "Nexus Engine: Online"
+end
+
+run_diagnostic()
+
+out "System will wait for 2 seconds..."
+wait 2
+
+set finish_text = "The Nexus script has finished execution!"
+out finish_text
+gui.msg(finish_text)
+
+out "Nexus Shutdown."
