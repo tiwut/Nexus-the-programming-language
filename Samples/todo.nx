@@ -1,0 +1,35 @@
+# ==========================
+# NEXUS TODO & EVENT MANAGER
+# ==========================
+
+set app_title = "Nexus Event Planner"
+set data_file = "events.txt"
+out "Starting " + app_title
+
+fn add_event()
+    input event_data "What is the new event/todo?"
+    io.write(data_file, event_data)
+    out "Event saved: " + event_data
+    gui.msg("Success: Event added to " + data_file)
+end
+
+fn show_events()
+    out "Loading events from file..."
+    set list = io.read(data_file)
+    gui.msg("Your Current Events: " + list)
+end
+
+fn clear_list()
+    io.write(data_file, "")
+    out "List cleared."
+    gui.msg("All events have been deleted.")
+end
+
+gui.window(app_title)
+gui.color("white")
+gui.label("--- Nexus Todo Dashboard ---")
+gui.button("Add New Event", "add_event")
+gui.button("View All Events", "show_events")
+gui.button("Clear List", "clear_list")
+
+gui.run()
