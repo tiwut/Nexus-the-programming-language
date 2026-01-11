@@ -4,16 +4,13 @@
 #include <map>
 #include <fstream>
 #include <regex>
-#include <random>
-#include <ctime>
 #include <sstream>
-#include <algorithm>
-#include <unistd.h>
 
 using namespace std;
 
 map<string, string> vars;
 map<string, vector<string>> funcs;
+vector<pair<string, string>> gui_buttons;
 
 string trim(string s) {
     if (s.empty()) return s;
@@ -23,137 +20,97 @@ string trim(string s) {
     return s;
 }
 
-string resolve(string input) {
+string read_file_content(string filename) {
+    ifstream f(filename);
+    if (!f.is_open()) return "Empty";
+    string line, content = "";
+    while(getline(f, line)) content += line + " | ";
+    return content.empty() ? "Empty" : content;
+}
+
+string resolve_complex(string input) {
     input = trim(input);
-    if (input.empty()) return "";
-    if (input.size() >= 2 && input.front() == '"' && input.back() == '"') {
-        return input.substr(1, input.size() - 2);
+    
+    if (input.find("io.read(") != string::npos) {
+        size_t start = input.find("(") + 1;
+        size_t end = input.find_last_of(")");
+        string filename_var = input.substr(start, end - start);
+        return read_file_content(resolve_complex(filename_var));
     }
-    if (vars.count(input)) return vars[input];
-    return input;
+
+    string result = "";
+    stringstream ss(input); string part;
+    while (getline(ss, part, '+')) {
+        part = trim(part);
+        if (part.size() >= 2 && part.front() == '"') result += part.substr(1, part.size() - 2);
+        else if (vars.count(part)) result += vars[part];
+        else result += part;
+    }
+    return result;
+}
+
+void runNexus(vector<string> lines);
+
+void show_cpp_dashboard() {
+    while (true) {
+        string cmd = "zenity --list --title=\"Nexus Dashboard\" --column=\"Actions\" ";
+        for (auto& btn : gui_buttons) cmd += "\"" + btn.first + "\" ";
+        cmd += "\"Exit\" 2>/dev/null";
+        char buf[128]; string choice = ""; FILE* p = popen(cmd.c_str(), "r");
+        if (p) { while (fgets(buf, 128, p)) choice += buf; pclose(p); }
+        choice = trim(choice);
+        if (choice == "Exit" || choice == "") break;
+        for (auto& btn : gui_buttons) if (btn.first == choice) runNexus(funcs[btn.second]);
+    }
 }
 
 void runNexus(vector<string> lines) {
     for (size_t i = 0; i < lines.size(); ++i) {
         string line = trim(lines[i]);
-        if (line.empty() || line.substr(0, 2) == "//" || line[0] == '#') continue;
-
+        if (line.empty() || line[0] == '#') continue;
         smatch m;
-
-        if (regex_search(line, m, regex(R"(set\s+(\w+)\s*=\s*(.*))"))) {
-            string name = m[1];
-            string val = m[2];
-            
-            if (val.find(" + ") != string::npos) {
-                string leftPart = val.substr(0, val.find(" + "));
-                string rightPart = val.substr(val.find(" + ") + 3);
-                string left = resolve(leftPart);
-                string right = resolve(rightPart);
-                
-                try {
-                    double res = stod(left) + stod(right);
-                    vars[name] = to_string(res);
-                } catch (...) {
-                    vars[name] = left + right;
-                }
-            } else {
-                vars[name] = resolve(val);
-            }
+        if (regex_search(line, m, regex(R"(set\s+(\w+)\s*=\s*(.*))"))) vars[m[1]] = resolve_complex(m[2]);
+        else if (regex_search(line, m, regex(R"(out\s+(.*))"))) cout << "Nexus › " << resolve_complex(m[1]) << endl;
+        else if (regex_search(line, m, regex(R"(input\s+(\w+)\s+(.*))"))) {
+            string pr = resolve_complex(m[2]);
+            string cmd = "zenity --entry --text=\"" + pr + "\" 2>/dev/null";
+            char buf[128]; string r = ""; FILE* p = popen(cmd.c_str(), "r");
+            if (p) { while (fgets(buf, 128, p)) r += buf; pclose(p); }
+            vars[m[1]] = trim(r);
         }
-
-        else if (val == "input") {
-            string var_name = tokens[i+1][1];
-            string prompt = resolve(tokens[i+2][1]);
-            string cmd = "zenity --entry --text=\"" + prompt + "\" --title=\"Nexus Input\"";
-            char buffer[128];
-            string result = "";
-            FILE* pipe = popen(cmd.c_str(), "r");
-            if (pipe) {
-                while (fgets(buffer, sizeof(buffer), pipe) != NULL) result += buffer;
-                pclose(pipe);
-            }
-            vars[var_name] = trim(result);
-            i += 2;
-        }
-
-        else if (regex_search(line, m, regex(R"(out\s+(.*))"))) {
-            cout << "Nexus-CPP › " << resolve(m[1]) << endl;
-        }
-
-        else if (line.find("sys.shell(") != string::npos) {
-            size_t start = line.find("(") + 1;
-            size_t end = line.find_last_of(")");
-            string cmd = resolve(line.substr(start, end - start));
-            system(cmd.c_str());
-        }
-        else if (line.find("sys.info()") != string::npos) {
-            cout << "Nexus Core v0.6 | OS: " << vars["OS"] << " | Arch: " << vars["ARCH"] << endl;
-        }
-
         else if (line.find("gui.msg(") != string::npos) {
-            size_t start = line.find("(") + 1;
-            size_t end = line.find_last_of(")");
-            string msg = resolve(line.substr(start, end - start));
-            string cmd = "zenity --info --text=\"" + msg + "\" --title=\"Nexus GUI\" 2>/dev/null";
-            system(cmd.c_str());
+            string msg = resolve_complex(line.substr(8, line.find_last_of(")") - 8));
+            system(("zenity --info --text=\"" + msg + "\" 2>/dev/null").c_str());
         }
-
+        else if (line.find("gui.button(") != string::npos) {
+            size_t f = line.find("\"") + 1; size_t s = line.find("\"", f);
+            size_t t = line.find("\"", s + 1) + 1; size_t fo = line.find("\"", t);
+            gui_buttons.push_back({line.substr(f, s-f), line.substr(t, fo-t)});
+        }
+        else if (line.find("io.write(") != string::npos) {
+            size_t comma = line.find(",");
+            string file = resolve_complex(line.substr(9, comma - 9));
+            string data = resolve_complex(line.substr(comma + 1, line.find_last_of(")") - (comma + 1)));
+            if (data == "") { ofstream out(file); out.close(); }
+            else { ofstream out(file, ios::app); out << data << endl; }
+        }
         else if (line.substr(0, 2) == "fn") {
-            string funcName = trim(line.substr(3, line.find("(") - 3));
-            vector<string> body;
-            i++;
-            while (i < lines.size() && trim(lines[i]) != "end") {
-                body.push_back(lines[i]);
-                i++;
-            }
-            funcs[funcName] = body;
+            string n = trim(line.substr(3, line.find("(") - 3));
+            vector<string> b; i++;
+            while (i < lines.size() && trim(lines[i]) != "end") { b.push_back(lines[i]); i++; }
+            funcs[n] = b;
         }
-
-        else if (line.substr(0, 5) == "wait ") {
-            try {
-                int seconds = stoi(resolve(line.substr(5)));
-                sleep(seconds);
-            } catch (...) {}
-        }
-
+        else if (line.find("gui.run()") != string::npos) show_cpp_dashboard();
         else if (line.find("()") != string::npos) {
-            string funcName = line.substr(0, line.find("("));
-            if (funcs.count(funcName)) {
-                runNexus(funcs[funcName]);
-            }
+            string n = line.substr(0, line.find("("));
+            if (funcs.count(n)) runNexus(funcs[n]);
         }
     }
 }
 
 int main(int argc, char* argv[]) {
-    srand(time(0));
-    
-    vars["OS"] = "Ubuntu/Linux";
-    vars["ARCH"] = "x64";
-    vars["VER"] = "0.6-Titan-CPP";
-
-    if (argc < 2) {
-        cout << "===============================" << endl;
-        cout << "   NEXUS TITAN C++ INTERPRETER  " << endl;
-        cout << "===============================" << endl;
-        cout << "Usage: ./nexus <file.nx>" << endl;
-        return 1;
-    }
-
-    ifstream file(argv[1]);
-    if (!file.is_open()) {
-        cerr << "Error: Could not open file " << argv[1] << endl;
-        return 1;
-    }
-
-    vector<string> lines;
-    string line;
-    while (getline(file, line)) {
-        lines.push_back(line);
-    }
-    file.close();
-    
-    runNexus(lines);
-
-    return 0;
+    if (argc < 2) return 1;
+    ifstream f(argv[1]); vector<string> l; string s;
+    while (getline(f, s)) l.push_back(s);
+    runNexus(l); return 0;
 }
