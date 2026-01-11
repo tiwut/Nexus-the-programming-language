@@ -24,7 +24,6 @@
             overflow-x: hidden;
         }
 
-        /* Responsive Background */
         .background {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -49,7 +48,6 @@
             border-radius: 20px;
         }
 
-        /* Hero Section */
         header {
             min-height: 80vh;
             display: flex;
@@ -76,7 +74,6 @@
             max-width: 600px;
         }
 
-        /* Tabs & Comparison */
         .comparison-section { padding: 60px 0; }
         
         .tabs { 
@@ -107,7 +104,7 @@
             border-radius: 15px;
             font-family: 'Fira Code', monospace;
             font-size: clamp(0.75rem, 3vw, 0.95rem);
-            overflow-x: auto; /* Erlaubt horizontales Scrollen auf Handys */
+            overflow-x: auto;
             white-space: pre;
             border: 1px solid var(--glass-border);
         }
@@ -115,7 +112,6 @@
         .code-container { display: none; }
         .code-container.active { display: block; animation: fadeIn 0.4s ease; }
 
-        /* Feature & Instruction Grids */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -136,7 +132,6 @@
             overflow-x: auto;
         }
 
-        /* Buttons */
         .btn-glow {
             padding: 14px 32px;
             background: var(--accent);
@@ -151,7 +146,6 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Mobile Specific Fixes */
         @media (max-width: 600px) {
             .container { padding: 0 10px; }
             .card { padding: 20px; }
@@ -178,7 +172,6 @@
 
     <main class="container">
 
-        <!-- Comparison -->
         <section id="comparison" class="comparison-section">
             <h2 style="text-align: center; margin-bottom: 30px;">Cross-Engine Comparison</h2>
             
@@ -191,32 +184,31 @@
 
                 <div class="code-area">
                     <div id="nexus" class="code-container active">
-<span class="comment"># Ultra-clean Nexus Syntax</span>
-<span class="keyword">set</span> name = <span class="keyword">input</span> "Name?"
-<span class="keyword">set</span> data = <span class="keyword">io.read</span>("events.txt")
-<span class="keyword">gui.msg</span>("Hello " + name + " | " + data)
+                        <span class="comment"># Ultra-clean Nexus Syntax</span>
+                        <span class="keyword">set</span> name = <span class="keyword">input</span> "Name?"
+                        <span class="keyword">set</span> data = <span class="keyword">io.read</span>("events.txt")
+                        <span class="keyword">gui.msg</span>("Hello " + name + " | " + data)
                     </div>
 
                     <div id="python" class="code-container">
-<span class="comment"># Python requires multiple imports for GUI</span>
-<span class="keyword">from</span> tkinter <span class="keyword">import</span> simpledialog, messagebox
-name = simpledialog.askstring("Input", "Name?")
-<span class="keyword">with</span> open("events.txt", "r") <span class="keyword">as</span> f: data = f.read()
-messagebox.showinfo("Nexus", f"Hello {name} | {data}")
+                        <span class="comment"># Python requires multiple imports for GUI</span>
+                        <span class="keyword">from</span> tkinter <span class="keyword">import</span> simpledialog, messagebox 
+                        name = simpledialog.askstring("Input", "Name?")
+                        <span class="keyword">with</span> open("events.txt", "r") <span class="keyword">as</span> f: data = f.read() 
+                        messagebox.showinfo("Nexus", f"Hello {name} | {data}")
                     </div>
 
                     <div id="cpp" class="code-container">
-<span class="comment">// C++ needs system pipes and headers</span>
-string name = zenity_input("Name?");
-ifstream f("events.txt"); 
-string data((istreambuf_iterator&lt;char&gt;(f)), ...);
-system("zenity --info --text='Hello " + name + "'");
+                        <span class="comment">// C++ needs system pipes and headers</span>
+                        string name = zenity_input("Name?");
+                        ifstream f("events.txt"); 
+                        string data((istreambuf_iterator&lt;char&gt;(f)), ...);
+                        system("zenity --info --text='Hello " + name + "'");
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Instructions -->
         <section class="grid">
             <div class="glass card">
                 <h3>Python Engine</h3>
@@ -230,7 +222,6 @@ system("zenity --info --text='Hello " + name + "'");
             </div>
         </section>
 
-        <!-- Features -->
         <section style="margin-bottom: 80px;">
             <h2 style="text-align: center;">Why Nexus?</h2>
             <div class="grid">
@@ -255,6 +246,7 @@ system("zenity --info --text='Hello " + name + "'");
         &copy; 2026 Tiwut.
         <a href="https://tiwut.de/cookie-banner-information.html" style=" color: #a0a0a0; text-decoration: none; font-size: 0.8rem;">Legal Notice</a>
     </footer>
+    
     <script data-goatcounter="https://tiwut.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
     <script src="https://tiwut.de/Script/enforce_https.js" defer></script>
     <script src="cookie.notice.js"></script>
@@ -267,7 +259,6 @@ system("zenity --info --text='Hello " + name + "'");
             event.currentTarget.classList.add('active');
         }
 
-        // Smooth Scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
