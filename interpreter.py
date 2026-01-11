@@ -137,6 +137,10 @@ class NexusTitan:
 
     def call_mod(self, mod, func, args):
         try:
+            if func == 'read':
+                if os.path.exists(args[0]):
+                    with open(args[0], 'r') as f: return f.read()
+                return "No events found."
             if mod == 'sys':
                 if func == 'shell': return subprocess.run(args[0], shell=True, capture_output=True).stdout.decode()
                 if func == 'exit': sys.exit()
