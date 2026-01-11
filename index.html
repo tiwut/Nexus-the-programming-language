@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Titan</title>
+    <title>Nexus Titan | Responsive Glass Syntax</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --glass: rgba(255, 255, 255, 0.08);
-            --glass-heavy: rgba(255, 255, 255, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.15);
             --accent: #00f2ff;
-            --accent-glow: rgba(0, 242, 255, 0.5);
+            --accent-glow: rgba(0, 242, 255, 0.3);
             --text: #f0f0f0;
         }
 
@@ -21,109 +20,148 @@
             font-family: 'Inter', sans-serif;
             color: var(--text);
             background: #050505;
-            line-height: 1.6;
+            line-height: 1.5;
             overflow-x: hidden;
         }
 
+        /* Responsive Background */
         .background {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: url('main.avif') no-repeat center center/cover;
-            filter: blur(40px) brightness(0.4);
+            filter: blur(30px) brightness(0.3);
             transform: scale(1.1);
             z-index: -1;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .container { 
+            width: 100%;
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 15px; 
+        }
 
         .glass {
             background: var(--glass);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
         }
 
+        /* Hero Section */
         header {
-            height: 100vh;
+            min-height: 80vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
+            padding: 60px 10px;
         }
 
         header h1 {
-            font-size: clamp(3rem, 10vw, 6rem);
+            font-size: clamp(2.5rem, 12vw, 5.5rem);
             font-weight: 800;
             background: linear-gradient(to right, #fff, var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            line-height: 1.1;
             margin-bottom: 20px;
-            letter-spacing: -3px;
         }
 
-        header p { font-size: 1.5rem; opacity: 0.8; max-width: 700px; }
+        header p { 
+            font-size: clamp(1rem, 4vw, 1.25rem); 
+            opacity: 0.8; 
+            max-width: 600px;
+        }
 
-        .comparison-section { padding: 100px 0; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        /* Tabs & Comparison */
+        .comparison-section { padding: 60px 0; }
+        
+        .tabs { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+            justify-content: center;
+        }
+
         .tab-btn {
-            padding: 10px 25px;
+            padding: 10px 20px;
             background: var(--glass);
             border: 1px solid var(--glass-border);
             color: white;
             border-radius: 50px;
             cursor: pointer;
+            font-size: 0.9rem;
             transition: 0.3s;
         }
-        .tab-btn.active { background: var(--accent); color: black; font-weight: bold; }
 
-        .code-container {
-            display: none;
-            padding: 30px;
-            border-radius: 20px;
-            background: rgba(0,0,0,0.6);
-            font-family: 'Fira Code', monospace;
+        .tab-btn.active { background: var(--accent); color: #000; font-weight: bold; }
+
+        .code-area {
             position: relative;
-        }
-        .code-container.active { display: block; animation: fadeIn 0.5s ease; }
-
-        .lang-tag {
-            position: absolute;
-            top: 20px; right: 20px;
-            font-size: 0.8rem;
-            color: var(--accent);
-            text-transform: uppercase;
-            font-weight: bold;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            font-family: 'Fira Code', monospace;
+            font-size: clamp(0.75rem, 3vw, 0.95rem);
+            overflow-x: auto; /* Erlaubt horizontales Scrollen auf Handys */
+            white-space: pre;
+            border: 1px solid var(--glass-border);
         }
 
-        .feature-grid {
+        .code-container { display: none; }
+        .code-container.active { display: block; animation: fadeIn 0.4s ease; }
+
+        /* Feature & Instruction Grids */
+        .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
-            margin-top: 50px;
+            margin: 40px 0;
         }
-        .feature-card { padding: 30px; transition: 0.3s; }
-        .feature-card:hover { border-color: var(--accent); transform: translateY(-5px); }
 
-        .instructions { padding: 50px 0; }
+        .card { padding: 25px; }
+
+        .card h2, .card h3 { margin-bottom: 15px; color: var(--accent); }
+
+        pre {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+
+        /* Buttons */
         .btn-glow {
-            padding: 15px 40px;
+            padding: 14px 32px;
             background: var(--accent);
             color: black;
             text-decoration: none;
             border-radius: 50px;
-            font-weight: 800;
-            box-shadow: 0 0 20px var(--accent-glow);
+            font-weight: 700;
+            display: inline-block;
+            box-shadow: 0 0 15px var(--accent-glow);
             transition: 0.3s;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        h2 { font-size: 2.5rem; margin-bottom: 30px; }
-        code { color: #88faff; }
-        .comment { color: #666; }
+        /* Mobile Specific Fixes */
+        @media (max-width: 600px) {
+            .container { padding: 0 10px; }
+            .card { padding: 20px; }
+            .tabs { flex-direction: row; }
+            .tab-btn { flex: 1; text-align: center; padding: 8px 10px; font-size: 0.8rem; }
+            header { min-height: 60vh; }
+        }
+
         .keyword { color: var(--accent); }
+        .comment { color: #6e6e6e; font-style: italic; }
     </style>
 </head>
 <body>
@@ -132,111 +170,111 @@
 
     <header class="container">
         <h1>NEXUS TITAN</h1>
-        <p>The first truly cross-platform scripting language built for both Python flexibility and C++ performance.</p>
-        <div style="margin-top: 40px;">
-            <a href="#comparison" class="btn-glow">View Comparison</a>
+        <p>A high-performance scripting language bridging the gap between Python and C++.</p>
+        <div style="margin-top: 30px;">
+            <a href="#comparison" class="btn-glow">Explore Syntax</a>
         </div>
     </header>
 
-    <div class="container">
+    <main class="container">
 
+        <!-- Comparison -->
         <section id="comparison" class="comparison-section">
-            <h2 style="text-align: center;">Code Comparison</h2>
-            <p style="text-align: center; opacity: 0.7; margin-bottom: 40px;">See how Nexus simplifies common tasks compared to industry giants.</p>
+            <h2 style="text-align: center; margin-bottom: 30px;">Cross-Engine Comparison</h2>
             
-            <div class="glass" style="padding: 20px;">
+            <div class="glass card">
                 <div class="tabs">
-                    <button class="tab-btn active" onclick="showLang('nexus')">Nexus Titan</button>
-                    <button class="tab-btn" onclick="showLang('python')">Python</button>
-                    <button class="tab-btn" onclick="showLang('cpp')">C++</button>
+                    <button class="tab-btn active" onclick="showLang(event, 'nexus')">Nexus</button>
+                    <button class="tab-btn" onclick="showLang(event, 'python')">Python</button>
+                    <button class="tab-btn" onclick="showLang(event, 'cpp')">C++ Core</button>
                 </div>
 
-                <div id="nexus" class="code-container active">
-                    <div class="lang-tag">Nexus Language</div>
-                    <span class="comment"># Simple UI and File Logic</span><br>
-                    <span class="keyword">set</span> user = <span class="keyword">input</span> <span class="keyword">"Your Name?"</span><br>
-                    <span class="keyword">set</span> data = <span class="keyword">io.read</span>(<span class="keyword">"log.txt"</span>)<br>
-                    <span class="keyword">gui.msg</span>(<span class="keyword">"Welcome "</span> + user + <span class="keyword">" Data: "</span> + data)
-                </div>
-
-                <div id="python" class="code-container">
-                    <div class="lang-tag">Python 3</div>
-                    <span class="comment"># Requires multiple imports and logic blocks</span><br>
-                    <span class="keyword">import</span> tkinter <span class="keyword">as</span> tk<br>
-                    <span class="keyword">from</span> tkinter <span class="keyword">import</span> simpledialog, messagebox<br>
-                    user = simpledialog.askstring(<span class="keyword">"Input"</span>, <span class="keyword">"Your Name?"</span>)<br>
-                    <span class="keyword">with</span> open(<span class="keyword">"log.txt"</span>, <span class="keyword">"r"</span>) <span class="keyword">as</span> f: data = f.read()<br>
-                    messagebox.showinfo(<span class="keyword">"Welcome"</span>, f<span class="keyword">"Welcome {user} Data: {data}"</span>)
-                </div>
-
-                <div id="cpp" class="code-container">
-                    <div class="lang-tag">C++ (Linux/Zenity)</div>
-                    <span class="comment">// Heavy syntax and manual pipe handling</span><br>
-                    string user; FILE* p = popen(<span class="keyword">"zenity --entry"</span>, <span class="keyword">"r"</span>);<br>
-                    <span class="comment">// ... manual buffer reading ...</span><br>
-                    ifstream f(<span class="keyword">"log.txt"</span>); string data((istreambuf_iterator&lt;char&gt;(f)), ...);<br>
-                    system((<span class="keyword">"zenity --info --text='Welcome "</span> + user + <span class="keyword">"'"</span>).c_str());
-                </div>
-            </div>
-        </section>
-
-        <section id="run" class="instructions">
-            <div class="glass" style="padding: 40px;">
-                <h2>How to Run .nx Files</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
-                    <div>
-                        <h3 style="color: var(--accent);">Using Python Interpreter</h3>
-                        <p>Perfect for GUI development and fast scripting.</p>
-                        <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-top: 10px;">python3 interpreter.py script.nx</pre>
+                <div class="code-area">
+                    <div id="nexus" class="code-container active">
+<span class="comment"># Ultra-clean Nexus Syntax</span>
+<span class="keyword">set</span> name = <span class="keyword">input</span> "Name?"
+<span class="keyword">set</span> data = <span class="keyword">io.read</span>("events.txt")
+<span class="keyword">gui.msg</span>("Hello " + name + " | " + data)
                     </div>
-                    <div>
-                        <h3 style="color: var(--accent);">Using C++ Interpreter</h3>
-                        <p>Best for high performance and system tools.</p>
-                        <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-top: 10px;">g++ -o nexus nexus.cpp<br>./nexus script.nx</pre>
+
+                    <div id="python" class="code-container">
+<span class="comment"># Python requires multiple imports for GUI</span>
+<span class="keyword">from</span> tkinter <span class="keyword">import</span> simpledialog, messagebox
+name = simpledialog.askstring("Input", "Name?")
+<span class="keyword">with</span> open("events.txt", "r") <span class="keyword">as</span> f: data = f.read()
+messagebox.showinfo("Nexus", f"Hello {name} | {data}")
+                    </div>
+
+                    <div id="cpp" class="code-container">
+<span class="comment">// C++ needs system pipes and headers</span>
+string name = zenity_input("Name?");
+ifstream f("events.txt"); 
+string data((istreambuf_iterator&lt;char&gt;(f)), ...);
+system("zenity --info --text='Hello " + name + "'");
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="comparison-section">
-            <h2 style="text-align: center;">Engine Features</h2>
-            <div class="feature-grid">
-                <div class="glass feature-card">
-                    <h3>Modular IO</h3>
-                    <p>Native file reading and writing with simplified paths.</p>
+        <!-- Instructions -->
+        <section class="grid">
+            <div class="glass card">
+                <h3>Python Engine</h3>
+                <p>Run your .nx scripts with full GUI support using the Python interpreter.</p>
+                <pre>python3 interpreter.py app.nx</pre>
+            </div>
+            <div class="glass card">
+                <h3>C++ Engine</h3>
+                <p>Blazing fast execution. Compile the core once and run anywhere.</p>
+                <pre>g++ -o nexus nexus.cpp && ./nexus app.nx</pre>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section style="margin-bottom: 80px;">
+            <h2 style="text-align: center;">Why Nexus?</h2>
+            <div class="grid">
+                <div class="glass card">
+                    <h4>Lightweight</h4>
+                    <p>The entire interpreter is less than 150 lines of code, making it easy to embed.</p>
                 </div>
-                <div class="glass feature-card">
-                    <h3>Cross-GUI</h3>
-                    <p>Uses Tkinter for Python and Zenity for C++ natively.</p>
+                <div class="glass card">
+                    <h4>Zenity & Tkinter</h4>
+                    <p>Automatic GUI scaling. Uses the best available toolkit for your platform.</p>
                 </div>
-                <div class="glass feature-card">
-                    <h3>System Shell</h3>
-                    <p>Execute terminal commands directly with <code>sys.shell()</code>.</p>
-                </div>
-                <div class="glass feature-card">
-                    <h3>Fast Variables</h3>
-                    <p>Dynamic typing that handles both math and string concatenation.</p>
+                <div class="glass card">
+                    <h4>Safe IO</h4>
+                    <p>Built-in protection for file operations and system shell access.</p>
                 </div>
             </div>
         </section>
 
-    </div>
+    </main>
 
-    <footer style="text-align: center; padding: 100px 0; opacity: 0.5;">
-        <p>&copy; 2025 Tiwut | Syntax for the New Era</p>
-        <a href="https://tiwut.de/cookie-banner-information.html" style="color: #a0a0a0; text-decoration: none; font-size: 0.8rem;">Legal Notice</a>
+    <footer style="text-align: center; padding: 40px; opacity: 0.4; font-size: 0.8rem;">
+        &copy; 2026 Tiwut.
+        <script data-goatcounter="https://tiwut.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+        <script src="https://tiwut.de/Script/enforce_https.js" defer></script>
+        <script src="cookie.notice.js"></script>
     </footer>
 
     <script>
-        function showLang(lang) {
+        function showLang(event, lang) {
             document.querySelectorAll('.code-container').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(lang).classList.add('active');
-            event.target.classList.add('active');
+            event.currentTarget.classList.add('active');
         }
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
     </script>
-    <script data-goatcounter="https://tiwut.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-    <script src="https://tiwut.de/Script/enforce_https.js" defer></script>
-    <script src="cookie.notice.js"></script>
 </body>
 </html>
