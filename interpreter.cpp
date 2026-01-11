@@ -61,6 +61,21 @@ void runNexus(vector<string> lines) {
             }
         }
 
+        else if (val == "input") {
+            string var_name = tokens[i+1][1];
+            string prompt = resolve(tokens[i+2][1]);
+            string cmd = "zenity --entry --text=\"" + prompt + "\" --title=\"Nexus Input\"";
+            char buffer[128];
+            string result = "";
+            FILE* pipe = popen(cmd.c_str(), "r");
+            if (pipe) {
+                while (fgets(buffer, sizeof(buffer), pipe) != NULL) result += buffer;
+                pclose(pipe);
+            }
+            vars[var_name] = trim(result);
+            i += 2;
+        }
+
         else if (regex_search(line, m, regex(R"(out\s+(.*))"))) {
             cout << "Nexus-CPP › " << resolve(m[1]) << endl;
         }
