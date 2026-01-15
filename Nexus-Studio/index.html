@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Nexus Studio</title>
-    <!-- Wir laden eine stabile Version (v10), damit es keine Überraschungen gibt -->
     <script src="https://unpkg.com/blockly@10.0.0/blockly.min.js"></script>
 
     <style>
@@ -47,7 +46,6 @@
         </div>
     </div>
 
-    <!-- TOOLBOX -->
     <xml id="toolbox" style="display: none">
         <category name="Core" colour="#FFAB00">
             <block type="nexus_out">
@@ -96,19 +94,16 @@
     </xml>
 
     <script>
-        // --- 1. SETUP GENERATOR (Must be first) ---
         const nexusGen = new Blockly.Generator('Nexus');
         const ORDER_ATOMIC = 0;
         const ORDER_NONE = 99;
         
-        // IMPORTANT: The Scrub function is needed to handle blocks connected below other blocks!
         nexusGen.scrub_ = function(block, code, opt_thisOnly) {
             const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
             const nextCode = opt_thisOnly ? '' : nexusGen.blockToCode(nextBlock);
             return code + nextCode;
         };
 
-        // --- 2. DEFINE BLOCKS (Visuals) ---
         Blockly.defineBlocksWithJsonArray([
             { "type": "nexus_out", "message0": "out %1", "args0": [{ "type": "input_value", "name": "TEXT" }], "previousStatement": null, "nextStatement": null, "colour": 40 },
             { "type": "nexus_input", "message0": "input to %1 prompt %2", "args0": [{ "type": "field_variable", "name": "VAR", "variable": "x" }, { "type": "input_value", "name": "PROMPT" }], "previousStatement": null, "nextStatement": null, "colour": 40 },
@@ -127,7 +122,6 @@
             { "type": "nexus_comment", "message0": "# %1", "args0": [{ "type": "field_input", "name": "TEXT", "text": "..." }], "previousStatement": null, "nextStatement": null, "colour": 200 }
         ]);
 
-        // --- 3. DEFINE CODE LOGIC (Using forBlock for Modern Compatibility) ---
         
         nexusGen.forBlock['text'] = function(b) { return ['"' + b.getFieldValue('TEXT') + '"', ORDER_ATOMIC]; };
         nexusGen.forBlock['math_number'] = function(b) { return [b.getFieldValue('NUM'), ORDER_ATOMIC]; };
@@ -190,7 +184,6 @@
             return nexusGen.nameDB_.getName(b.getFieldValue('NAME'), 'PROCEDURE') + '()\n';
         };
 
-        // GUI & IO Handlers
         nexusGen.forBlock['nexus_gui_msg'] = function(b) { return 'gui.msg(' + (nexusGen.valueToCode(b, 'TEXT', ORDER_NONE)||'""') + ')\n'; };
         nexusGen.forBlock['nexus_gui_window'] = function(b) { return 'gui.window(' + (nexusGen.valueToCode(b, 'TITLE', ORDER_NONE)||'""') + ')\n'; };
         nexusGen.forBlock['nexus_gui_label'] = function(b) { return 'gui.label(' + (nexusGen.valueToCode(b, 'TEXT', ORDER_NONE)||'""') + ')\n'; };
@@ -207,8 +200,6 @@
         };
         nexusGen.forBlock['nexus_comment'] = function(b) { return '# ' + b.getFieldValue('TEXT') + '\n'; };
 
-
-        // --- 4. INJECT WORKSPACE ---
         const workspace = Blockly.inject('blocklyDiv', {
             toolbox: document.getElementById('toolbox'),
             scrollbars: true, trashcan: true,
@@ -217,21 +208,18 @@
             theme: Blockly.Themes.Dark
         });
 
-        // --- 5. APP LOGIC ---
         function updateCode() {
             try {
                 const code = nexusGen.workspaceToCode(workspace);
                 document.getElementById('codeOutput').textContent = code;
                 document.getElementById('consoleOutput').innerHTML = "<span style='color:#666'>Ready...</span>";
             } catch (e) {
-                // Zeigt jetzt den genauen Fehler an, falls etwas schief geht
                 document.getElementById('consoleOutput').innerHTML = "<span style='color:red'>Error: " + e.message + "</span>";
                 console.error(e);
             }
         }
         workspace.addChangeListener(updateCode);
 
-        // Buttons
         document.getElementById('saveBtn').addEventListener('click', () => {
             const code = nexusGen.workspaceToCode(workspace);
             const a = document.createElement("a");
@@ -259,7 +247,6 @@
             } catch(e) { log("<span style='color:red'>Simulation Error: " + e.message + "</span>"); }
         });
         
-        // Initial run
         setTimeout(updateCode, 100);
     </script>
 </body>
