@@ -2,300 +2,344 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Nexus Titan | Next-Gen Scripting</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
-    <script data-goatcounter="https://tiwut.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-    <script src="https://tiwut.de/cookie.notice.js"></script>
-    <script src="https://tiwut.de/Script/enforce_https.js" defer></script>
+    <title>Nexus Studio</title>
+    <script src="https://unpkg.com/blockly@10.0.0/blockly.min.js"></script>
 
     <style>
-        :root {
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-hover: rgba(255, 255, 255, 0.07);
-            --accent: #00f2ff;
-            --accent-gradient: linear-gradient(135deg, #00f2ff, #0072ff);
-            --accent-glow: rgba(0, 242, 255, 0.3);
-            --text-main: #ffffff;
-            --text-dim: #c7c3c3;
-        }
+        :root { --bg: #1e1e1e; --panel: #252526; --border: #3e3e42; --accent: #007acc; --text: #080808; --green: #4caf50; --orange: #e67e22; --purple: #9b59b6; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        header { background: #333; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--border); }
+        .brand { font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
+        .brand span { color: var(--accent); }
+        
+        .btn { border: none; padding: 8px 12px; border-radius: 3px; cursor: pointer; color: white; font-weight: bold; margin-left: 5px; transition: 0.2s; font-size: 0.8rem;}
+        .run { background: var(--green); } .run:hover { background: #43a047; }
+        .save-code { background: var(--accent); } .save-code:hover { background: #006bb3; }
+        .save-proj { background: #5c2d91; } .save-proj:hover { background: #46226e; }
+        .load-proj { background: var(--orange); } .load-proj:hover { background: #d35400; }
+        .import-nx { background: var(--purple); } .import-nx:hover { background: #8e44ad; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: var(--text-main);
-            background: #030303;
-            line-height: 1.6;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .background {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('main.avif') no-repeat center center/cover;
-            filter: blur(0px) brightness(0.9);
-            transform: scale(1.1);
-            z-index: -1;
-        }
-
-        .container { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-
-        nav {
-            position: sticky;
-            top: 20px;
-            margin: 20px auto;
-            width: 95%;
-            max-width: 500px;
-            padding: 10px 15px;
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 100px;
-            display: flex;
-            justify-content: space-around;
-            z-index: 1000;
-        }
-
-        nav a { 
-            color: var(--text-dim); 
-            text-decoration: none; 
-            font-size: 0.8rem; 
-            font-weight: 600; 
-            transition: 0.3s;
-            padding: 8px 12px;
-        }
-        nav a:hover { color: var(--accent); }
-
-        header {
-            padding: clamp(60px, 15vh, 120px) 0 clamp(40px, 10vh, 80px);
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: clamp(2.5rem, 12vw, 5rem);
-            font-weight: 800;
-            letter-spacing: -2px;
-            background: linear-gradient(to bottom, #fff 40%, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1.1;
-        }
-
-        header p { 
-            margin: 20px auto; 
-            max-width: 600px; 
-            color: var(--text-dim); 
-            font-size: clamp(1rem, 4vw, 1.1rem); 
-            padding: 0 10px;
-        }
-
-        .glass {
-            background: var(--glass);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        .glass:hover { background: var(--glass-hover); border-color: rgba(0, 242, 255, 0.3); }
-
-        .code-window { margin-top: 20px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
-        .window-header { padding: 15px 20px; background: rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
-        .red { background: #ff5f56; } .yellow { background: #ffbd2e; } .green { background: #27c93f; }
-
-        .tabs { 
-            display: flex; 
-            overflow-x: auto; 
-            background: rgba(0,0,0,0.2); 
-            padding: 5px;
-            scrollbar-width: none;
-        }
-        .tabs::-webkit-scrollbar { display: none; }
-
-        .tab-btn {
-            padding: 12px 20px; background: transparent; border: none; color: var(--text-dim);
-            font-family: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 12px; transition: 0.3s;
-            flex: 1; text-align: center; min-width: 100px;
-        }
-        .tab-btn.active { background: var(--glass-hover); color: var(--accent); }
-
-        .code-content { 
-            padding: 20px; 
-            font-family: 'Fira Code', monospace; 
-            font-size: clamp(0.75rem, 3.5vw, 0.9rem); 
-            overflow-x: auto; 
-            min-height: 180px;
-            background: rgba(0,0,0,0.2);
-        }
-        .code-container { display: none; white-space: pre-wrap; word-break: break-all; }
-        .code-container.active { display: block; animation: fadeIn 0.4s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 20px; 
-            margin: 40px 0; 
-        }
-        .card { padding: clamp(25px, 5vw, 35px); }
-        .card h3 { 
-            font-size: 1.4rem; 
-            margin-bottom: 15px; 
-            background: var(--accent-gradient); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-        }
-        .card p { color: var(--text-dim); font-size: 0.95rem; }
-
-        pre { 
-            background: rgba(0,0,0,0.4); 
-            padding: 15px; 
-            border-radius: 14px; 
-            margin-top: 20px; 
-            font-size: 0.8rem; 
-            color: #00f2ff; 
-            border: 1px solid rgba(255,255,255,0.05);
-            overflow-x: auto;
-        }
-
-        .btn-main {
-            display: inline-block; padding: 16px 35px; background: var(--accent-gradient); color: #000;
-            text-decoration: none; font-weight: 700; border-radius: 100px; box-shadow: 0 10px 25px var(--accent-glow); transition: 0.3s;
-        }
-        .btn-main:active { transform: scale(0.95); }
-
-        .reveal { opacity: 0; transform: translateY(20px); transition: 0.6s all ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-
-        footer { padding: 60px 0 40px; text-align: center; border-top: 1px solid var(--glass-border); margin-top: 40px;}
-        footer p { color: var(--text-dim); font-size: 0.85rem; }
-
-        @media (max-width: 600px) {
-            .grid { grid-template-columns: 1fr; }
-            nav a { padding: 8px 8px; font-size: 0.75rem; }
-            .glass:hover { transform: none; }
-        }
-
-        .keyword { color: var(--accent); }
-        .comment { color: #00e04b; font-style: italic; }
+        .workspace { display: flex; flex: 1; height: calc(100vh - 50px); }
+        .editor { flex: 3; height: 100%; }
+        .sidebar { flex: 1; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; min-width: 300px; }
+        
+        .panel-header { padding: 10px; background: #2d2d30; font-size: 0.75rem; text-transform: uppercase; color: #888; border-bottom: 1px solid var(--border); font-weight: bold; }
+        .code-view { flex: 1; margin: 0; padding: 15px; overflow: auto; color: #9cdcfe; font-family: monospace; background: #1e1e1e; border-bottom: 1px solid var(--border); white-space: pre-wrap; }
+        .console-view { height: 200px; padding: 10px; background: #000; color: #0f0; font-family: monospace; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-<div class="background"></div>
+    <header>
+        <div class="brand"><span style="font-size:1.5em">💠</span> Nexus<span>Studio</span></div>
+        <div>
+            <input type="file" id="projInput" accept=".xml" style="display: none;">
+            <input type="file" id="nxInput" accept=".nx,.txt" style="display: none;">
+            
+            <button id="importNxBtn" class="btn import-nx">⬆ Import .nx</button>
+            <span style="border-left: 1px solid #555; margin: 0 5px; height: 20px; display: inline-block; vertical-align: middle;"></span>
+            <button id="loadProjBtn" class="btn load-proj">📂 Load Project</button>
+            <button id="saveProjBtn" class="btn save-proj">💾 Save Project</button>
+            <span style="border-left: 1px solid #555; margin: 0 5px; height: 20px; display: inline-block; vertical-align: middle;"></span>
+            <button id="runBtn" class="btn run">▶ Run</button>
+            <button id="saveCodeBtn" class="btn save-code">⬇ Export .nx</button>
+        </div>
+    </header>
 
-<nav>
-    <a href="#">Home</a>
-    <a href="#comparison">Compare</a>
-    <a href="#install">Install</a>
-    <a href="#why">Philosophy</a>
-</nav>
-
-<header class="container">
-    <h1>NEXUS TITAN</h1>
-    <p>The bridge between high-speed execution and human-readable scripting. Built for developers who value performance and elegance.</p>
-    <div style="margin-top: 30px;">
-        <a href="https://github.com/tiwut/Nexus-the-programming-language" class="btn-main">Get Started</a>
-        <a href="https://tiwut.github.io/Nexus-the-programming-language/Nexus-Studio/" class="btn-main">Nexus Studio</a>
+    <div class="workspace">
+        <div id="blocklyDiv" class="editor"></div>
+        <div class="sidebar">
+            <div class="panel-header">Generated Code</div>
+            <pre id="codeOutput" class="code-view"></pre>
+            <div class="panel-header">Console</div>
+            <div id="consoleOutput" class="console-view"><span style="color:#666">Ready...</span></div>
+        </div>
     </div>
-</header>
 
-<main class="container">
-    <section id="comparison" class="reveal">
-        <div class="glass code-window">
-            <div class="window-header">
-                <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
-                <span style="margin-left: 10px; font-size: 0.7rem; opacity: 0.5;">Nexus Titan vs Others</span>
-            </div>
-            <div class="tabs">
-                <button class="tab-btn active" onclick="showLang(event, 'nexus')">Nexus</button>
-                <button class="tab-btn" onclick="showLang(event, 'python')">Python 3</button>
-                <button class="tab-btn" onclick="showLang(event, 'cpp')">C++ (Core)</button>
-            </div>
-            <div class="code-content">
-                <div id="nexus" class="code-container active"><span class="comment"># The future of simplified automation</span>
-<span class="keyword">set</span> name = <span class="keyword">input</span> "What's your name?"
-<span class="keyword">set</span> data = <span class="keyword">io.read</span>("log.nx")
-<span class="keyword">gui.msg</span>("Welcome " + name + " | " + data)</div>
-                <div id="python" class="code-container"><span class="comment"># Verbose GUI library handling</span>
-<span class="keyword">from</span> tkinter <span class="keyword">import</span> simpledialog, messagebox
-n = simpledialog.askstring("Input", "Name?")
-<span class="keyword">with</span> open("log.nx", "r") <span class="keyword">as</span> f: d = f.read()
-messagebox.showinfo("Nexus", f"Hi {n} | {d}")</div>
-                <div id="cpp" class="code-container"><span class="comment">// Heavy headers and complex piping</span>
-string n = zenity_input("Name?");
-ifstream f("log.nx"); 
-string d((istreambuf_iterator&lt;char&gt;(f)), ...);
-system(("zenity --info --text='Hi " + n + "'").c_str());</div>
-            </div>
-        </div>
-    </section>
+    <xml id="toolbox" style="display: none">
+        <category name="Core" colour="#FFAB00">
+            <block type="nexus_out"><value name="TEXT"><shadow type="text"><field name="TEXT">Hello World</field></shadow></value></block>
+            <block type="nexus_input"><value name="PROMPT"><shadow type="text"><field name="TEXT">Enter Name:</field></shadow></value></block>
+            <block type="nexus_wait"><value name="SECONDS"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+            <block type="nexus_comment"></block>
+        </category>
+        <category name="Variables" colour="#EF5350" custom="VARIABLE"></category>
+        <category name="Logic" colour="#42A5F5">
+            <block type="nexus_if"></block>
+            <block type="nexus_loop"></block>
+            <block type="logic_compare"></block>
+            <block type="nexus_math_calc"></block>
+            <block type="math_number"></block>
+            <block type="text"></block>
+        </category>
+        <category name="Functions" colour="#AB47BC" custom="PROCEDURE"></category>
+        <category name="GUI" colour="#66BB6A">
+            <block type="nexus_gui_window"><value name="TITLE"><shadow type="text"><field name="TEXT">My App</field></shadow></value></block>
+            <block type="nexus_gui_label"><value name="TEXT"><shadow type="text"><field name="TEXT">Label</field></shadow></value></block>
+            <block type="nexus_gui_msg"><value name="TEXT"><shadow type="text"><field name="TEXT">Alert</field></shadow></value></block>
+            <block type="nexus_gui_button"><value name="LABEL"><shadow type="text"><field name="TEXT">Click</field></shadow></value><value name="FUNC"><shadow type="text"><field name="TEXT">funcName</field></shadow></value></block>
+            <block type="nexus_gui_run"></block>
+        </category>
+        <category name="File I/O" colour="#FFA726">
+            <block type="nexus_io_write"><value name="FILENAME"><shadow type="text"><field name="TEXT">log.txt</field></shadow></value><value name="CONTENT"><shadow type="text"><field name="TEXT">Data</field></shadow></value></block>
+            <block type="nexus_io_read"><value name="FILENAME"><shadow type="text"><field name="TEXT">log.txt</field></shadow></value></block>
+        </category>
+    </xml>
 
-    <section id="install" class="grid reveal">
-        <div class="glass card">
-            <h3>Python Engine</h3>
-            <p>Run .nx files instantly using our highly optimized Python bridge.</p>
-            <pre>python3 interpreter.py app.nx</pre>
-        </div>
-        <div class="glass card">
-            <h3>Native C++</h3>
-            <p>The core engine. Zero dependencies, compiled for raw hardware speed.</p>
-            <pre>g++ -o nexus core.cpp && ./nexus app.nx</pre>
-        </div>
-    </section>
+    <script>
+        const nexusGen = new Blockly.Generator('Nexus');
+        const ORDER_ATOMIC = 0;
+        const ORDER_NONE = 99;
+        nexusGen.scrub_ = function(block, code, opt_thisOnly) {
+            const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
+            const nextCode = opt_thisOnly ? '' : nexusGen.blockToCode(nextBlock);
+            return code + nextCode;
+        };
 
-    <section id="why" class="grid reveal">
-        <div class="glass card">
-            <h3>Zenity Native</h3>
-            <p>On Linux, Nexus automatically detects GTK and uses native system dialogs for a professional look.</p>
-        </div>
-        <div class="glass card">
-            <h3>Titan IO</h3>
-            <p>Revolutionary file access. Read, write, and append with single-line commands without boilerplate.</p>
-        </div>
-        <div class="glass card">
-            <h3>Hybrid Core</h3>
-            <p>Choose your engine. Develop in Python-Nexus, deploy in C++-Nexus for maximum performance.</p>
-        </div>
-    </section>
-</main>
+        Blockly.defineBlocksWithJsonArray([
+            { "type": "nexus_out", "message0": "out %1", "args0": [{ "type": "input_value", "name": "TEXT" }], "previousStatement": null, "nextStatement": null, "colour": 40 },
+            { "type": "nexus_input", "message0": "input to %1 prompt %2", "args0": [{ "type": "field_variable", "name": "VAR", "variable": "x" }, { "type": "input_value", "name": "PROMPT" }], "previousStatement": null, "nextStatement": null, "colour": 40 },
+            { "type": "nexus_wait", "message0": "wait %1s", "args0": [{ "type": "input_value", "name": "SECONDS" }], "previousStatement": null, "nextStatement": null, "colour": 40 },
+            { "type": "nexus_math_calc", "message0": "%1 %2 %3", "args0": [{ "type": "input_value", "name": "A" }, { "type": "field_dropdown", "name": "OP", "options": [["+", "+"], ["-", "-"], ["*", "*"], ["/", "/"]] }, { "type": "input_value", "name": "B" }], "output": null, "colour": 230 },
+            { "type": "nexus_if", "message0": "if %1", "args0": [{ "type": "input_value", "name": "COND" }], "message1": "do %1", "args1": [{ "type": "input_statement", "name": "DO" }], "previousStatement": null, "nextStatement": null, "colour": 210 },
+            { "type": "nexus_loop", "message0": "loop %1", "args0": [{ "type": "input_statement", "name": "DO" }], "previousStatement": null, "nextStatement": null, "colour": 120 },
+            { "type": "nexus_gui_msg", "message0": "gui.msg( %1 )", "args0": [{ "type": "input_value", "name": "TEXT" }], "previousStatement": null, "nextStatement": null, "colour": 120 },
+            { "type": "nexus_gui_window", "message0": "gui.window( %1 )", "args0": [{ "type": "input_value", "name": "TITLE" }], "previousStatement": null, "nextStatement": null, "colour": 120 },
+            { "type": "nexus_gui_label", "message0": "gui.label( %1 )", "args0": [{ "type": "input_value", "name": "TEXT" }], "previousStatement": null, "nextStatement": null, "colour": 120 },
+            { "type": "nexus_gui_button", "message0": "gui.button( %1, runs %2 )", "args0": [{ "type": "input_value", "name": "LABEL" }, { "type": "input_value", "name": "FUNC" }], "previousStatement": null, "nextStatement": null, "colour": 120 },
+            { "type": "nexus_gui_run", "message0": "gui.run()", "previousStatement": null, "colour": 120 },
+            { "type": "nexus_io_write", "message0": "io.write( %1, %2 )", "args0": [{ "type": "input_value", "name": "FILENAME" }, { "type": "input_value", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": 30 },
+            { "type": "nexus_io_read", "message0": "io.read( %1 )", "args0": [{ "type": "input_value", "name": "FILENAME" }], "output": null, "colour": 30 },
+            { "type": "nexus_comment", "message0": "# %1", "args0": [{ "type": "field_input", "name": "TEXT", "text": "..." }], "previousStatement": null, "nextStatement": null, "colour": 200 }
+        ]);
 
-<footer class="container">
-    <p>&copy; 2026 Tiwut. All rights reserved.</p>
-    <div style="margin-top: 15px;">
-        <a href="https://tiwut.de/cookie-banner-information.html" style="color: var(--accent); text-decoration: none; font-size: 0.8rem;">Legal Notice</a>
-    </div>
-</footer>
+        nexusGen.forBlock['text'] = function(b) { return ['"' + b.getFieldValue('TEXT') + '"', ORDER_ATOMIC]; };
+        nexusGen.forBlock['math_number'] = function(b) { return [b.getFieldValue('NUM'), ORDER_ATOMIC]; };
+        nexusGen.forBlock['nexus_out'] = function(b) { return 'out ' + (nexusGen.valueToCode(b, 'TEXT', ORDER_NONE) || '""') + '\n'; };
+        nexusGen.forBlock['nexus_input'] = function(b) { return 'input ' + Blockly.Common.names.getName(b.getFieldValue('VAR'), 'VARIABLE') + ' ' + (nexusGen.valueToCode(b, 'PROMPT', ORDER_NONE) || '""') + '\n'; };
+        nexusGen.forBlock['nexus_wait'] = function(b) { return 'wait ' + (nexusGen.valueToCode(b, 'SECONDS', ORDER_NONE) || '1') + '\n'; };
+        nexusGen.forBlock['variables_set'] = function(b) { return 'set ' + Blockly.Common.names.getName(b.getFieldValue('VAR'), 'VARIABLE') + ' = ' + (nexusGen.valueToCode(b, 'VALUE', ORDER_NONE) || '0') + '\n'; };
+        nexusGen.forBlock['variables_get'] = function(b) { return [Blockly.Common.names.getName(b.getFieldValue('VAR'), 'VARIABLE'), ORDER_ATOMIC]; };
+        nexusGen.forBlock['nexus_math_calc'] = function(b) { return [(nexusGen.valueToCode(b, 'A', ORDER_ATOMIC) || '0') + ' ' + b.getFieldValue('OP') + ' ' + (nexusGen.valueToCode(b, 'B', ORDER_ATOMIC) || '0'), ORDER_ATOMIC]; };
+        nexusGen.forBlock['nexus_if'] = function(b) { return 'if ' + (nexusGen.valueToCode(b, 'COND', ORDER_NONE) || '1') + '\n' + nexusGen.statementToCode(b, 'DO') + 'end\n'; };
+        nexusGen.forBlock['nexus_loop'] = function(b) { return 'loop\n' + nexusGen.statementToCode(b, 'DO') + 'end\n'; };
+        nexusGen.forBlock['logic_compare'] = function(b) { return [(nexusGen.valueToCode(b, 'A', ORDER_ATOMIC) || '0') + ' ' + {'EQ':'==','NEQ':'!=','LT':'<','LTE':'<=','GT':'>','GTE':'>='}[b.getFieldValue('OP')] + ' ' + (nexusGen.valueToCode(b, 'B', ORDER_ATOMIC) || '0'), ORDER_ATOMIC]; };
+        nexusGen.forBlock['nexus_gui_msg'] = function(b) { return 'gui.msg(' + (nexusGen.valueToCode(b, 'TEXT', ORDER_NONE)||'""') + ')\n'; };
+        nexusGen.forBlock['nexus_gui_window'] = function(b) { return 'gui.window(' + (nexusGen.valueToCode(b, 'TITLE', ORDER_NONE)||'""') + ')\n'; };
+        nexusGen.forBlock['nexus_gui_label'] = function(b) { return 'gui.label(' + (nexusGen.valueToCode(b, 'TEXT', ORDER_NONE)||'""') + ')\n'; };
+        nexusGen.forBlock['nexus_gui_button'] = function(b) { return 'gui.button(' + (nexusGen.valueToCode(b, 'LABEL', ORDER_NONE)||'""') + ', ' + (nexusGen.valueToCode(b, 'FUNC', ORDER_NONE)||'""') + ')\n'; };
+        nexusGen.forBlock['nexus_gui_run'] = function(b) { return 'gui.run()\n'; };
+        nexusGen.forBlock['nexus_io_write'] = function(b) { return 'io.write(' + (nexusGen.valueToCode(b, 'FILENAME', ORDER_NONE)||'""') + ', ' + (nexusGen.valueToCode(b, 'CONTENT', ORDER_NONE)||'""') + ')\n'; };
+        nexusGen.forBlock['nexus_io_read'] = function(b) { return ['io.read(' + (nexusGen.valueToCode(b, 'FILENAME', ORDER_NONE)||'""') + ')', ORDER_ATOMIC]; };
+        nexusGen.forBlock['nexus_comment'] = function(b) { return '# ' + b.getFieldValue('TEXT') + '\n'; };
 
-<script>
-    function showLang(event, lang) {
-        document.querySelectorAll('.code-container').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(lang).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
+        const workspace = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('toolbox'),
+            scrollbars: true, trashcan: true,
+            grid: { spacing: 25, length: 3, colour: '#444', snap: true },
+            zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3 },
+            theme: Blockly.Themes.Dark
+        });
 
-    function reveal() {
-        var reveals = document.querySelectorAll(".reveal");
-        for (var i = 0; i < reveals.length; i++) {
-            var windowHeight = window.innerHeight;
-            var elementTop = reveals[i].getBoundingClientRect().top;
-            var elementVisible = 100;
-            if (elementTop < windowHeight - elementVisible) {
-                reveals[i].classList.add("active");
+        function parseNexusToBlocks(text) {
+            workspace.clear();
+            const lines = text.split(/\r?\n/);
+            
+            let previousBlock = null;
+            let stack = [];
+
+            function createValueBlock(val) {
+                val = val.trim();
+                let block;
+                if (val.startsWith('"') && val.endsWith('"')) {
+                    block = workspace.newBlock('text');
+                    block.setFieldValue(val.slice(1, -1), 'TEXT');
+                } else if (!isNaN(val)) {
+                    block = workspace.newBlock('math_number');
+                    block.setFieldValue(val, 'NUM');
+                } else {
+                    block = workspace.newBlock('variables_get');
+                    workspace.createVariable(val);
+                    block.setFieldValue(workspace.getVariable(val).getId(), 'VAR');
+                }
+                block.initSvg();
+                block.render();
+                return block;
             }
+
+            function connectLine(newBlock) {
+                if (stack.length > 0) {
+                    const parent = stack[stack.length - 1];
+                    if (!parent.hasChild) {
+                        parent.block.getInput('DO').connection.connect(newBlock.previousConnection);
+                        parent.hasChild = true;
+                    } else {
+                        if (previousBlock) previousBlock.nextConnection.connect(newBlock.previousConnection);
+                    }
+                } else {
+                    if (previousBlock) previousBlock.nextConnection.connect(newBlock.previousConnection);
+                }
+                previousBlock = newBlock;
+            }
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+
+                let newBlock = null;
+
+                if (line.startsWith('out ')) {
+                    newBlock = workspace.newBlock('nexus_out');
+                    const arg = line.substring(4).trim();
+                    const valBlock = createValueBlock(arg);
+                    newBlock.getInput('TEXT').connection.connect(valBlock.outputConnection);
+                }
+                else if (line.startsWith('gui.msg(')) {
+                    newBlock = workspace.newBlock('nexus_gui_msg');
+                    const arg = line.substring(8, line.lastIndexOf(')'));
+                    const valBlock = createValueBlock(arg);
+                    newBlock.getInput('TEXT').connection.connect(valBlock.outputConnection);
+                }
+                else if (line.startsWith('gui.button(')) {
+                    newBlock = workspace.newBlock('nexus_gui_button');
+                    const args = line.substring(11, line.lastIndexOf(')')).split(',');
+                    if(args[0]) newBlock.getInput('LABEL').connection.connect(createValueBlock(args[0]).outputConnection);
+                    if(args[1]) newBlock.getInput('FUNC').connection.connect(createValueBlock(args[1]).outputConnection);
+                }
+                else if (line.startsWith('gui.window(')) {
+                    newBlock = workspace.newBlock('nexus_gui_window');
+                    const arg = line.substring(11, line.lastIndexOf(')'));
+                    newBlock.getInput('TITLE').connection.connect(createValueBlock(arg).outputConnection);
+                }
+                else if (line.startsWith('gui.label(')) {
+                    newBlock = workspace.newBlock('nexus_gui_label');
+                    const arg = line.substring(10, line.lastIndexOf(')'));
+                    newBlock.getInput('TEXT').connection.connect(createValueBlock(arg).outputConnection);
+                }
+                else if (line.startsWith('gui.run()')) {
+                    newBlock = workspace.newBlock('nexus_gui_run');
+                }
+                else if (line.startsWith('wait ')) {
+                    newBlock = workspace.newBlock('nexus_wait');
+                    const arg = line.substring(5).trim();
+                    newBlock.getInput('SECONDS').connection.connect(createValueBlock(arg).outputConnection);
+                }
+                else if (line.startsWith('set ')) {
+                    const match = line.match(/set\s+(\w+)\s*=\s*(.*)/);
+                    if (match) {
+                        newBlock = workspace.newBlock('variables_set');
+                        workspace.createVariable(match[1]);
+                        newBlock.setFieldValue(workspace.getVariable(match[1]).getId(), 'VAR');
+                        newBlock.getInput('VALUE').connection.connect(createValueBlock(match[2]).outputConnection);
+                    }
+                }
+                else if (line.startsWith('if ')) {
+                    newBlock = workspace.newBlock('nexus_if');
+                    const arg = line.substring(3).trim();
+                    newBlock.getInput('COND').connection.connect(createValueBlock(arg).outputConnection);
+                    
+                    newBlock.initSvg(); newBlock.render();
+                    connectLine(newBlock);
+                    
+                    stack.push({ block: newBlock, hasChild: false });
+                    return;
+                }
+                else if (line.startsWith('loop')) {
+                    newBlock = workspace.newBlock('nexus_loop');
+                    newBlock.initSvg(); newBlock.render();
+                    connectLine(newBlock);
+                    stack.push({ block: newBlock, hasChild: false });
+                    return;
+                }
+                else if (line === 'end') {
+                    if (stack.length > 0) {
+                        const finished = stack.pop();
+                        previousBlock = finished.block;
+                    }
+                    return;
+                }
+                else if (line.startsWith('#')) {
+                    newBlock = workspace.newBlock('nexus_comment');
+                    newBlock.setFieldValue(line.substring(1).trim(), 'TEXT');
+                }
+
+                if (newBlock) {
+                    newBlock.initSvg();
+                    newBlock.render();
+                    connectLine(newBlock);
+                }
+            });
+            
+            console.log("Import finished.");
         }
-    }
-    window.addEventListener("scroll", reveal);
-    reveal();
-</script>
+
+
+        function updateCode() {
+            try {
+                const code = nexusGen.workspaceToCode(workspace);
+                document.getElementById('codeOutput').textContent = code;
+            } catch (e) {}
+        }
+        workspace.addChangeListener(updateCode);
+
+        document.getElementById('saveCodeBtn').addEventListener('click', () => {
+            const code = nexusGen.workspaceToCode(workspace);
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([code], { type: "text/plain" }));
+            a.download = "program.nx"; a.click();
+        });
+
+        document.getElementById('saveProjBtn').addEventListener('click', () => {
+            const xmlText = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace));
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([xmlText], { type: "text/xml" }));
+            a.download = "project.xml"; a.click();
+        });
+        
+        const projInput = document.getElementById('projInput');
+        document.getElementById('loadProjBtn').addEventListener('click', () => projInput.click());
+        projInput.addEventListener('change', (e) => {
+            const r = new FileReader();
+            r.onload = (ev) => { workspace.clear(); Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(ev.target.result), workspace); };
+            r.readAsText(e.target.files[0]);
+            projInput.value = "";
+        });
+
+        const nxInput = document.getElementById('nxInput');
+        document.getElementById('importNxBtn').addEventListener('click', () => nxInput.click());
+        nxInput.addEventListener('change', (e) => {
+            const r = new FileReader();
+            r.onload = (ev) => { 
+                try {
+                    parseNexusToBlocks(ev.target.result); 
+                } catch(err) {
+                    alert("Import Error: " + err.message + "\nComplex logic might not be supported.");
+                }
+            };
+            r.readAsText(e.target.files[0]);
+            nxInput.value = "";
+        });
+
+        document.getElementById('runBtn').addEventListener('click', () => {
+            const consoleDiv = document.getElementById('consoleOutput');
+            consoleDiv.innerHTML = "";
+            const log = (m) => { consoleDiv.innerHTML += `<div><span style="color:#0f0">›</span> ${m}</div>`; consoleDiv.scrollTop = consoleDiv.scrollHeight; };
+            try {
+                const lines = nexusGen.workspaceToCode(workspace).split('\n');
+                log("Running...");
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (!line || line.startsWith('#')) return;
+                    if (line.startsWith('out ')) log(line.substring(4).replace(/"/g, ''));
+                    else if (line.startsWith('gui.msg')) log("[POPUP] " + line);
+                    else if (line.startsWith('gui.')) log("[GUI] " + line);
+                    else if (line.startsWith('input')) log("[INPUT] " + line);
+                });
+            } catch(e) { log("<span style='color:red'>" + e.message + "</span>"); }
+        });
+
+        setTimeout(updateCode, 100);
+    </script>
 </body>
 </html>
