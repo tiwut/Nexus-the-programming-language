@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Studio - IDE</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Blockly -->
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <span class="icon">💠</span> Nexus<span>Studio</span>
+        </div>
+        <div class="actions">
+            <button onclick="simulateCode()" class="btn run" title="Test logic in browser console">▶ Run Simulation</button>
+            <button onclick="downloadCode()" class="btn save" title="Download .nx file">⬇ Save .nx File</button>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <!-- Editor Area -->
+        <div id="blocklyDiv" class="editor"></div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="panel-header">Generated Nexus Code</div>
+            <pre id="codeOutput" class="code-view"></pre>
+            
+            <div class="panel-header">Simulator Console</div>
+            <div id="consoleOutput" class="console-view">
+                <span style="color:#666">Ready...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOOLBOX DEFINITION (English) -->
+    <xml id="toolbox" style="display: none">
+        <category name="Core" colour="#FFAB00">
+            <block type="nexus_out">
+                <value name="TEXT">
+                    <shadow type="text">
+                        <field name="TEXT">Hello World</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="nexus_input">
+                <value name="PROMPT">
+                    <shadow type="text">
+                        <field name="TEXT">Enter value:</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="nexus_wait">
+                <value name="SECONDS">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="nexus_comment"></block>
+        </category>
+
+        <category name="Variables" colour="#EF5350" custom="VARIABLE"></category>
+
+        <category name="Logic & Flow" colour="#42A5F5">
+            <block type="nexus_if"></block>
+            <block type="nexus_loop"></block> <!-- Based on 'loop' keyword in regex -->
+            <block type="logic_compare"></block>
+            <block type="logic_operation"></block>
+            <block type="nexus_math_calc"></block>
+            <block type="math_number"></block>
+            <block type="text"></block>
+        </category>
+
+        <category name="Functions" colour="#AB47BC" custom="PROCEDURE"></category>
+
+        <category name="GUI (Graphics)" colour="#66BB6A">
+            <block type="nexus_gui_window">
+                <value name="TITLE">
+                    <shadow type="text">
+                        <field name="TEXT">My App</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="nexus_gui_label">
+                <value name="TEXT">
+                    <shadow type="text">
+                        <field name="TEXT">Label Text</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="nexus_gui_msg">
+                <value name="TEXT">
+                    <shadow type="text">
+                        <field name="TEXT">Alert Message</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="nexus_gui_button">
+                <value name="LABEL">
+                    <shadow type="text">
+                        <field name="TEXT">Click Me</field>
+                    </shadow>
+                </value>
+                <value name="FUNC">
+                    <shadow type="text">
+                        <field name="TEXT">myFunction</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="nexus_gui_run"></block>
+        </category>
+
+        <category name="File I/O" colour="#FFA726">
+            <block type="nexus_io_write">
+                <value name="FILENAME">
+                    <shadow type="text">
+                        <field name="TEXT">data.txt</field>
+                    </shadow>
+                </value>
+                <value name="CONTENT">
+                    <shadow type="text">
+                        <field name="TEXT">Content</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="nexus_io_read">
+                <value name="FILENAME">
+                    <shadow type="text">
+                        <field name="TEXT">data.txt</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+
+        <category name="Advanced" colour="#78909C">
+            <!-- For generic module calls like sys or net found in regex -->
+            <block type="nexus_generic_module"></block>
+        </category>
+    </xml>
+
+    <script src="script.js"></script>
+</body>
+</html>
