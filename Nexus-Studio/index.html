@@ -4,9 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Studio - IDE</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Google Blockly -->
+    <!-- Google Blockly laden -->
     <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --bg: #1e1e1e;
+            --panel: #252526;
+            --border: #3e3e42;
+            --accent: #007acc;
+            --text: #cccccc;
+            --green: #4caf50;
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; /* Scrollbalken am Body verhindern */
+        }
+
+        header {
+            background: #333; 
+            height: 50px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 20px; 
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .brand { font-size: 1.2rem; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px;}
+        .brand span { color: var(--accent); }
+
+        .actions { display: flex; gap: 10px; }
+
+        .btn {
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 3px; 
+            cursor: pointer; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 0.9rem; 
+            transition: background 0.2s;
+        }
+        .run { background: var(--green); }
+        .run:hover { background: #43a047; }
+        .save { background: var(--accent); }
+        .save:hover { background: #006bb3; }
+
+        .workspace { 
+            display: flex; 
+            flex: 1; 
+            overflow: hidden; 
+            height: calc(100vh - 50px);
+        }
+
+        .editor { 
+            flex: 3; 
+            height: 100%; 
+            position: relative; 
+        }
+
+        .sidebar {
+            flex: 1; 
+            background: var(--panel); 
+            border-left: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column; 
+            min-width: 300px; 
+            max-width: 450px;
+        }
+
+        .panel-header {
+            padding: 10px; 
+            background: #2d2d30; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            color: #888; 
+            border-bottom: 1px solid var(--border); 
+            font-weight: bold;
+        }
+
+        .code-view {
+            flex: 1; 
+            margin: 0; 
+            padding: 15px; 
+            overflow: auto; 
+            color: #9cdcfe; 
+            font-family: 'Consolas', 'Courier New', monospace; 
+            font-size: 14px; 
+            background: #1e1e1e; 
+            border-bottom: 1px solid var(--border);
+            white-space: pre-wrap;
+        }
+
+        .console-view {
+            height: 200px; 
+            padding: 10px; 
+            background: #000; 
+            color: #0f0; 
+            font-family: 'Consolas', 'Courier New', monospace; 
+            font-size: 13px; 
+            overflow-y: auto; 
+            line-height: 1.4;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
 </head>
 <body>
 
@@ -15,19 +132,18 @@
             <span class="icon">💠</span> Nexus<span>Studio</span>
         </div>
         <div class="actions">
-            <button onclick="simulateCode()" class="btn run" title="Test logic in browser console">▶ Run Simulation</button>
-            <button onclick="downloadCode()" class="btn save" title="Download .nx file">⬇ Save .nx File</button>
+            <!-- Buttons haben jetzt IDs für JS -->
+            <button id="runBtn" class="btn run" title="Test logic in browser console">▶ Run Simulation</button>
+            <button id="saveBtn" class="btn save" title="Download .nx file">⬇ Save .nx File</button>
         </div>
     </header>
 
     <div class="workspace">
-        <!-- Editor Area -->
         <div id="blocklyDiv" class="editor"></div>
         
-        <!-- Sidebar -->
         <div class="sidebar">
             <div class="panel-header">Generated Nexus Code</div>
-            <pre id="codeOutput" class="code-view"></pre>
+            <pre id="codeOutput" class="code-view">// Nexus code will appear here...</pre>
             
             <div class="panel-header">Simulator Console</div>
             <div id="consoleOutput" class="console-view">
@@ -36,7 +152,7 @@
         </div>
     </div>
 
-    <!-- TOOLBOX DEFINITION (English) -->
+    <!-- TOOLBOX DEFINITION -->
     <xml id="toolbox" style="display: none">
         <category name="Core" colour="#FFAB00">
             <block type="nexus_out">
@@ -67,9 +183,8 @@
 
         <category name="Logic & Flow" colour="#42A5F5">
             <block type="nexus_if"></block>
-            <block type="nexus_loop"></block> <!-- Based on 'loop' keyword in regex -->
+            <block type="nexus_loop"></block>
             <block type="logic_compare"></block>
-            <block type="logic_operation"></block>
             <block type="nexus_math_calc"></block>
             <block type="math_number"></block>
             <block type="text"></block>
@@ -137,11 +252,364 @@
         </category>
 
         <category name="Advanced" colour="#78909C">
-            <!-- For generic module calls like sys or net found in regex -->
             <block type="nexus_generic_module"></block>
         </category>
     </xml>
 
-    <script src="script.js"></script>
+    <script>
+        // --- 1. INITIALIZE GENERATOR FIRST ---
+        // Wir erstellen den Generator BEVOR wir Blöcke definieren oder den Workspace laden.
+        const nexusGen = new Blockly.Generator('Nexus');
+        nexusGen.PRECEDENCE = 0;
+
+        // --- 2. DEFINE CUSTOM BLOCKS ---
+        Blockly.defineBlocksWithJsonArray([
+            {
+                "type": "nexus_out",
+                "message0": "out %1",
+                "args0": [{ "type": "input_value", "name": "TEXT" }],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 40,
+                "tooltip": "Print output to console"
+            },
+            {
+                "type": "nexus_input",
+                "message0": "input to variable %1 prompt %2",
+                "args0": [
+                    { "type": "field_variable", "name": "VAR", "variable": "myVar" },
+                    { "type": "input_value", "name": "PROMPT" }
+                ],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 40,
+                "tooltip": "Ask user for input"
+            },
+            {
+                "type": "nexus_wait",
+                "message0": "wait %1 seconds",
+                "args0": [{ "type": "input_value", "name": "SECONDS" }],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 40,
+                "tooltip": "Pause execution"
+            },
+            {
+                "type": "nexus_math_calc",
+                "message0": "%1 %2 %3",
+                "args0": [
+                    { "type": "input_value", "name": "A" },
+                    { "type": "field_dropdown", "name": "OP", "options": [
+                        ["+", "+"], ["-", "-"], ["*", "*"], ["/", "/"]
+                    ]},
+                    { "type": "input_value", "name": "B" }
+                ],
+                "output": null,
+                "colour": 230,
+                "tooltip": "Math operations"
+            },
+            {
+                "type": "nexus_if",
+                "message0": "if %1",
+                "args0": [{ "type": "input_value", "name": "CONDITION" }],
+                "message1": "do %1",
+                "args1": [{ "type": "input_statement", "name": "DO" }],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 210,
+                "tooltip": "If condition"
+            },
+            {
+                "type": "nexus_loop",
+                "message0": "loop %1",
+                "args0": [{ "type": "input_statement", "name": "DO" }],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 120,
+                "tooltip": "Infinite loop"
+            },
+            {
+                "type": "nexus_gui_msg",
+                "message0": "gui.msg( %1 )",
+                "args0": [{ "type": "input_value", "name": "TEXT" }],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 120,
+                "tooltip": "Show a popup message"
+            },
+            {
+                "type": "nexus_gui_window",
+                "message0": "gui.window( Title: %1 )",
+                "args0": [{ "type": "input_value", "name": "TITLE" }],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 120,
+                "tooltip": "Initialize window"
+            },
+            {
+                "type": "nexus_gui_label",
+                "message0": "gui.label( Text: %1 )",
+                "args0": [{ "type": "input_value", "name": "TEXT" }],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 120
+            },
+            {
+                "type": "nexus_gui_button",
+                "message0": "gui.button( Text: %1, Runs Function: %2 )",
+                "args0": [
+                    { "type": "input_value", "name": "LABEL" },
+                    { "type": "input_value", "name": "FUNC" }
+                ],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 120,
+                "tooltip": "Create a button that calls a function"
+            },
+            {
+                "type": "nexus_gui_run",
+                "message0": "gui.run()",
+                "previousStatement": null,
+                "colour": 120,
+                "tooltip": "Start the GUI event loop"
+            },
+            {
+                "type": "nexus_io_write",
+                "message0": "io.write( File: %1, Content: %2 )",
+                "args0": [
+                    { "type": "input_value", "name": "FILENAME" },
+                    { "type": "input_value", "name": "CONTENT" }
+                ],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 30,
+                "tooltip": "Write text to a file"
+            },
+            {
+                "type": "nexus_io_read",
+                "message0": "io.read( File: %1 )",
+                "args0": [{ "type": "input_value", "name": "FILENAME" }],
+                "output": null,
+                "colour": 30,
+                "tooltip": "Read text from a file"
+            },
+            {
+                "type": "nexus_generic_module",
+                "message0": "Module Call: %1 . %2 ( Args: %3 )",
+                "args0": [
+                    { "type": "field_dropdown", "name": "MOD", "options": [["sys", "sys"], ["net", "net"], ["math", "math"]]},
+                    { "type": "field_input", "name": "FUNC", "text": "command" },
+                    { "type": "input_value", "name": "ARGS" }
+                ],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 260,
+                "tooltip": "Call generic modules"
+            },
+            {
+                "type": "nexus_comment",
+                "message0": "# %1",
+                "args0": [{ "type": "field_input", "name": "TEXT", "text": "Comment..." }],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": 200
+            }
+        ]);
+
+        // --- 3. DEFINE GENERATOR LOGIC ---
+        
+        nexusGen['text'] = function(block) {
+            const code = block.getFieldValue('TEXT');
+            return ['"' + code + '"', nexusGen.PRECEDENCE];
+        };
+
+        nexusGen['math_number'] = function(block) {
+            const code = block.getFieldValue('NUM');
+            return [code, nexusGen.PRECEDENCE];
+        };
+
+        nexusGen['nexus_out'] = function(block) {
+            const value = nexusGen.valueToCode(block, 'TEXT', nexusGen.PRECEDENCE) || '""';
+            return 'out ' + value + '\n';
+        };
+
+        nexusGen['nexus_wait'] = function(block) {
+            const value = nexusGen.valueToCode(block, 'SECONDS', nexusGen.PRECEDENCE) || '1';
+            return 'wait ' + value + '\n';
+        };
+
+        nexusGen['variables_set'] = function(block) {
+            const argument0 = nexusGen.valueToCode(block, 'VALUE', nexusGen.PRECEDENCE) || '0';
+            const varName = Blockly.Common.names.getName(block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME);
+            return 'set ' + varName + ' = ' + argument0 + '\n';
+        };
+
+        nexusGen['variables_get'] = function(block) {
+            const code = Blockly.Common.names.getName(block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME);
+            return [code, nexusGen.PRECEDENCE];
+        };
+
+        nexusGen['nexus_input'] = function(block) {
+            const prompt = nexusGen.valueToCode(block, 'PROMPT', nexusGen.PRECEDENCE) || '"Input"';
+            const varName = Blockly.Common.names.getName(block.getFieldValue('VAR'), Blockly.VARIABLE_CATEGORY_NAME);
+            return 'input ' + varName + ' ' + prompt + '\n';
+        };
+
+        nexusGen['nexus_math_calc'] = function(block) {
+            const a = nexusGen.valueToCode(block, 'A', nexusGen.PRECEDENCE) || '0';
+            const b = nexusGen.valueToCode(block, 'B', nexusGen.PRECEDENCE) || '0';
+            const op = block.getFieldValue('OP');
+            return [a + ' ' + op + ' ' + b, nexusGen.PRECEDENCE];
+        };
+
+        nexusGen['nexus_if'] = function(block) {
+            const condition = nexusGen.valueToCode(block, 'CONDITION', nexusGen.PRECEDENCE) || '1';
+            const branch = nexusGen.statementToCode(block, 'DO');
+            return 'if ' + condition + '\n' + branch + 'end\n';
+        };
+
+        nexusGen['nexus_loop'] = function(block) {
+            const branch = nexusGen.statementToCode(block, 'DO');
+            return 'loop\n' + branch + 'end\n';
+        };
+
+        nexusGen['logic_compare'] = function(block) {
+            const A = nexusGen.valueToCode(block, 'A', nexusGen.PRECEDENCE) || '0';
+            const B = nexusGen.valueToCode(block, 'B', nexusGen.PRECEDENCE) || '0';
+            const op = block.getFieldValue('OP'); 
+            const map = { 'EQ': '==', 'NEQ': '!=', 'LT': '<', 'LTE': '<=', 'GT': '>', 'GTE': '>=' };
+            return [A + ' ' + map[op] + ' ' + B, nexusGen.PRECEDENCE];
+        };
+
+        nexusGen['procedures_defnoreturn'] = function(block) {
+            const funcName = nexusGen.nameDB_.getName(block.getFieldValue('NAME'), Blockly.PROCEDURE_CATEGORY_NAME);
+            const branch = nexusGen.statementToCode(block, 'STACK');
+            return 'fn ' + funcName + '\n' + branch + 'end\n';
+        };
+
+        nexusGen['procedures_callnoreturn'] = function(block) {
+            const funcName = nexusGen.nameDB_.getName(block.getFieldValue('NAME'), Blockly.PROCEDURE_CATEGORY_NAME);
+            return funcName + '()\n';
+        };
+
+        nexusGen['nexus_gui_msg'] = function(block) {
+            const text = nexusGen.valueToCode(block, 'TEXT', nexusGen.PRECEDENCE) || '""';
+            return 'gui.msg(' + text + ')\n';
+        };
+
+        nexusGen['nexus_gui_window'] = function(block) {
+            const title = nexusGen.valueToCode(block, 'TITLE', nexusGen.PRECEDENCE) || '"Window"';
+            return 'gui.window(' + title + ')\n';
+        };
+
+        nexusGen['nexus_gui_label'] = function(block) {
+            const text = nexusGen.valueToCode(block, 'TEXT', nexusGen.PRECEDENCE) || '""';
+            return 'gui.label(' + text + ')\n';
+        };
+
+        nexusGen['nexus_gui_button'] = function(block) {
+            const label = nexusGen.valueToCode(block, 'LABEL', nexusGen.PRECEDENCE) || '"Button"';
+            const func = nexusGen.valueToCode(block, 'FUNC', nexusGen.PRECEDENCE) || '"func"';
+            return 'gui.button(' + label + ', ' + func + ')\n';
+        };
+
+        nexusGen['nexus_gui_run'] = function(block) {
+            return 'gui.run()\n';
+        };
+
+        nexusGen['nexus_io_write'] = function(block) {
+            const file = nexusGen.valueToCode(block, 'FILENAME', nexusGen.PRECEDENCE) || '"file.txt"';
+            const content = nexusGen.valueToCode(block, 'CONTENT', nexusGen.PRECEDENCE) || '""';
+            return 'io.write(' + file + ', ' + content + ')\n';
+        };
+
+        nexusGen['nexus_io_read'] = function(block) {
+            const file = nexusGen.valueToCode(block, 'FILENAME', nexusGen.PRECEDENCE) || '"file.txt"';
+            return ['io.read(' + file + ')', nexusGen.PRECEDENCE];
+        };
+
+        nexusGen['nexus_generic_module'] = function(block) {
+            const mod = block.getFieldValue('MOD');
+            const func = block.getFieldValue('FUNC');
+            const args = nexusGen.valueToCode(block, 'ARGS', nexusGen.PRECEDENCE) || '';
+            return mod + '.' + func + '(' + args + ')\n';
+        };
+
+        nexusGen['nexus_comment'] = function(block) {
+            return '# ' + block.getFieldValue('TEXT') + '\n';
+        };
+
+        // --- 4. INJECT WORKSPACE ---
+
+        const workspace = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('toolbox'),
+            scrollbars: true,
+            trashcan: true,
+            grid: { spacing: 25, length: 3, colour: '#444', snap: true },
+            zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3 },
+            theme: Blockly.Themes.Dark
+        });
+
+        // --- 5. FUNCTIONS & LISTENERS ---
+
+        function updateCode() {
+            try {
+                const code = nexusGen.workspaceToCode(workspace);
+                document.getElementById('codeOutput').textContent = code;
+            } catch (e) {
+                console.warn("Generator not ready yet: " + e);
+            }
+        }
+        
+        // Listener für Änderungen im Workspace
+        workspace.addChangeListener(updateCode);
+
+        // --- Event Listener für Buttons ---
+
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            const code = nexusGen.workspaceToCode(workspace);
+            const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "program.nx";
+            a.click();
+        });
+
+        document.getElementById('runBtn').addEventListener('click', function() {
+            const rawCode = nexusGen.workspaceToCode(workspace);
+            const consoleDiv = document.getElementById('consoleOutput');
+            consoleDiv.innerHTML = "";
+            
+            const log = (msg) => {
+                consoleDiv.innerHTML += `<div><span style="color:#0f0">›</span> ${msg}</div>`;
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            };
+
+            log("Starting simulation...");
+            
+            const lines = rawCode.split('\n');
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                
+                if (line.startsWith('out ')) {
+                    log(line.substring(4).replace(/"/g, ''));
+                } else if (line.startsWith('gui.msg')) {
+                    log("[GUI Alert]: " + line.substring(8, line.length-1));
+                } else if (line.startsWith('gui.button')) {
+                    log("[GUI Button Created]: " + line);
+                } else if (line.startsWith('io.write')) {
+                    log("[File I/O]: Writing to file...");
+                } else if (line.startsWith('fn ')) {
+                    log("[Function Defined]: " + line.substring(3));
+                }
+            });
+            
+            log("<span style='color:#888'>Simulation ended.</span>");
+        });
+
+        // Trigger initial update
+        updateCode();
+    </script>
 </body>
 </html>
