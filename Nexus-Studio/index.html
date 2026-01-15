@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Nexus Studio</title>
-    <!-- Google Blockly (Latest) -->
-    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+    <!-- Wir laden eine stabile Version (v10), damit es keine Überraschungen gibt -->
+    <script src="https://unpkg.com/blockly@10.0.0/blockly.min.js"></script>
 
     <style>
         :root { --bg: #1e1e1e; --panel: #252526; --border: #3e3e42; --accent: #007acc; --text: #ccc; --green: #4caf50; }
@@ -96,7 +96,19 @@
     </xml>
 
     <script>
-        // --- 1. DEFINE BLOCKS (The Look) ---
+        // --- 1. SETUP GENERATOR (Must be first) ---
+        const nexusGen = new Blockly.Generator('Nexus');
+        const ORDER_ATOMIC = 0;
+        const ORDER_NONE = 99;
+        
+        // IMPORTANT: The Scrub function is needed to handle blocks connected below other blocks!
+        nexusGen.scrub_ = function(block, code, opt_thisOnly) {
+            const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
+            const nextCode = opt_thisOnly ? '' : nexusGen.blockToCode(nextBlock);
+            return code + nextCode;
+        };
+
+        // --- 2. DEFINE BLOCKS (Visuals) ---
         Blockly.defineBlocksWithJsonArray([
             { "type": "nexus_out", "message0": "out %1", "args0": [{ "type": "input_value", "name": "TEXT" }], "previousStatement": null, "nextStatement": null, "colour": 40 },
             { "type": "nexus_input", "message0": "input to %1 prompt %2", "args0": [{ "type": "field_variable", "name": "VAR", "variable": "x" }, { "type": "input_value", "name": "PROMPT" }], "previousStatement": null, "nextStatement": null, "colour": 40 },
@@ -115,90 +127,85 @@
             { "type": "nexus_comment", "message0": "# %1", "args0": [{ "type": "field_input", "name": "TEXT", "text": "..." }], "previousStatement": null, "nextStatement": null, "colour": 200 }
         ]);
 
-        // --- 2. CREATE GENERATOR ---
-        const nexusGen = new Blockly.Generator('Nexus');
-        nexusGen.PRECEDENCE = 0;
-
-        // --- 3. DEFINE GENERATOR LOGIC (The Code Translation) ---
-        nexusGen.forBlock = {}; // Ensure compatibility
-
-        nexusGen['text'] = function(b) { return ['"' + b.getFieldValue('TEXT') + '"', 0]; };
-        nexusGen['math_number'] = function(b) { return [b.getFieldValue('NUM'), 0]; };
+        // --- 3. DEFINE CODE LOGIC (Using forBlock for Modern Compatibility) ---
         
-        nexusGen['nexus_out'] = function(b) { 
-            const val = nexusGen.valueToCode(b, 'TEXT', 0) || '""';
+        nexusGen.forBlock['text'] = function(b) { return ['"' + b.getFieldValue('TEXT') + '"', ORDER_ATOMIC]; };
+        nexusGen.forBlock['math_number'] = function(b) { return [b.getFieldValue('NUM'), ORDER_ATOMIC]; };
+        
+        nexusGen.forBlock['nexus_out'] = function(b) { 
+            const val = nexusGen.valueToCode(b, 'TEXT', ORDER_NONE) || '""';
             return 'out ' + val + '\n'; 
         };
         
-        nexusGen['nexus_input'] = function(b) {
-            const p = nexusGen.valueToCode(b, 'PROMPT', 0) || '""';
+        nexusGen.forBlock['nexus_input'] = function(b) {
+            const p = nexusGen.valueToCode(b, 'PROMPT', ORDER_NONE) || '""';
             const v = Blockly.Common.names.getName(b.getFieldValue('VAR'), 'VARIABLE');
             return 'input ' + v + ' ' + p + '\n';
         };
 
-        nexusGen['nexus_wait'] = function(b) {
-            const s = nexusGen.valueToCode(b, 'SECONDS', 0) || '1';
+        nexusGen.forBlock['nexus_wait'] = function(b) {
+            const s = nexusGen.valueToCode(b, 'SECONDS', ORDER_NONE) || '1';
             return 'wait ' + s + '\n';
         };
 
-        nexusGen['variables_set'] = function(b) {
-            const arg = nexusGen.valueToCode(b, 'VALUE', 0) || '0';
+        nexusGen.forBlock['variables_set'] = function(b) {
+            const arg = nexusGen.valueToCode(b, 'VALUE', ORDER_NONE) || '0';
             const v = Blockly.Common.names.getName(b.getFieldValue('VAR'), 'VARIABLE');
             return 'set ' + v + ' = ' + arg + '\n';
         };
 
-        nexusGen['variables_get'] = function(b) {
+        nexusGen.forBlock['variables_get'] = function(b) {
             const v = Blockly.Common.names.getName(b.getFieldValue('VAR'), 'VARIABLE');
-            return [v, 0];
+            return [v, ORDER_ATOMIC];
         };
 
-        nexusGen['nexus_math_calc'] = function(b) {
-            const a = nexusGen.valueToCode(b, 'A', 0) || '0';
-            const B = nexusGen.valueToCode(b, 'B', 0) || '0';
-            return [a + ' ' + b.getFieldValue('OP') + ' ' + B, 0];
+        nexusGen.forBlock['nexus_math_calc'] = function(b) {
+            const a = nexusGen.valueToCode(b, 'A', ORDER_ATOMIC) || '0';
+            const B = nexusGen.valueToCode(b, 'B', ORDER_ATOMIC) || '0';
+            return [a + ' ' + b.getFieldValue('OP') + ' ' + B, ORDER_ATOMIC];
         };
 
-        nexusGen['nexus_if'] = function(b) {
-            const c = nexusGen.valueToCode(b, 'COND', 0) || '1';
+        nexusGen.forBlock['nexus_if'] = function(b) {
+            const c = nexusGen.valueToCode(b, 'COND', ORDER_NONE) || '1';
             const d = nexusGen.statementToCode(b, 'DO');
             return 'if ' + c + '\n' + d + 'end\n';
         };
 
-        nexusGen['nexus_loop'] = function(b) {
+        nexusGen.forBlock['nexus_loop'] = function(b) {
             return 'loop\n' + nexusGen.statementToCode(b, 'DO') + 'end\n';
         };
 
-        nexusGen['logic_compare'] = function(b) {
-            const A = nexusGen.valueToCode(b, 'A', 0) || '0';
-            const B = nexusGen.valueToCode(b, 'B', 0) || '0';
+        nexusGen.forBlock['logic_compare'] = function(b) {
+            const A = nexusGen.valueToCode(b, 'A', ORDER_ATOMIC) || '0';
+            const B = nexusGen.valueToCode(b, 'B', ORDER_ATOMIC) || '0';
             const op = { 'EQ': '==', 'NEQ': '!=', 'LT': '<', 'LTE': '<=', 'GT': '>', 'GTE': '>=' }[b.getFieldValue('OP')];
-            return [A + ' ' + op + ' ' + B, 0];
+            return [A + ' ' + op + ' ' + B, ORDER_ATOMIC];
         };
 
-        nexusGen['procedures_defnoreturn'] = function(b) {
+        nexusGen.forBlock['procedures_defnoreturn'] = function(b) {
             const n = nexusGen.nameDB_.getName(b.getFieldValue('NAME'), 'PROCEDURE');
             return 'fn ' + n + '\n' + nexusGen.statementToCode(b, 'STACK') + 'end\n';
         };
-        nexusGen['procedures_callnoreturn'] = function(b) {
+        nexusGen.forBlock['procedures_callnoreturn'] = function(b) {
             return nexusGen.nameDB_.getName(b.getFieldValue('NAME'), 'PROCEDURE') + '()\n';
         };
 
         // GUI & IO Handlers
-        nexusGen['nexus_gui_msg'] = function(b) { return 'gui.msg(' + (nexusGen.valueToCode(b, 'TEXT', 0)||'""') + ')\n'; };
-        nexusGen['nexus_gui_window'] = function(b) { return 'gui.window(' + (nexusGen.valueToCode(b, 'TITLE', 0)||'""') + ')\n'; };
-        nexusGen['nexus_gui_label'] = function(b) { return 'gui.label(' + (nexusGen.valueToCode(b, 'TEXT', 0)||'""') + ')\n'; };
-        nexusGen['nexus_gui_button'] = function(b) { 
-            return 'gui.button(' + (nexusGen.valueToCode(b, 'LABEL', 0)||'""') + ', ' + (nexusGen.valueToCode(b, 'FUNC', 0)||'""') + ')\n'; 
+        nexusGen.forBlock['nexus_gui_msg'] = function(b) { return 'gui.msg(' + (nexusGen.valueToCode(b, 'TEXT', ORDER_NONE)||'""') + ')\n'; };
+        nexusGen.forBlock['nexus_gui_window'] = function(b) { return 'gui.window(' + (nexusGen.valueToCode(b, 'TITLE', ORDER_NONE)||'""') + ')\n'; };
+        nexusGen.forBlock['nexus_gui_label'] = function(b) { return 'gui.label(' + (nexusGen.valueToCode(b, 'TEXT', ORDER_NONE)||'""') + ')\n'; };
+        nexusGen.forBlock['nexus_gui_button'] = function(b) { 
+            return 'gui.button(' + (nexusGen.valueToCode(b, 'LABEL', ORDER_NONE)||'""') + ', ' + (nexusGen.valueToCode(b, 'FUNC', ORDER_NONE)||'""') + ')\n'; 
         };
-        nexusGen['nexus_gui_run'] = function(b) { return 'gui.run()\n'; };
-        nexusGen['nexus_io_write'] = function(b) { 
-            return 'io.write(' + (nexusGen.valueToCode(b, 'FILENAME', 0)||'""') + ', ' + (nexusGen.valueToCode(b, 'CONTENT', 0)||'""') + ')\n'; 
+        nexusGen.forBlock['nexus_gui_run'] = function(b) { return 'gui.run()\n'; };
+        nexusGen.forBlock['nexus_io_write'] = function(b) { 
+            return 'io.write(' + (nexusGen.valueToCode(b, 'FILENAME', ORDER_NONE)||'""') + ', ' + (nexusGen.valueToCode(b, 'CONTENT', ORDER_NONE)||'""') + ')\n'; 
         };
-        nexusGen['nexus_io_read'] = function(b) { return ['io.read(' + (nexusGen.valueToCode(b, 'FILENAME', 0)||'""') + ')', 0]; };
-        nexusGen['nexus_generic_module'] = function(b) { 
-            return b.getFieldValue('MOD') + '.' + b.getFieldValue('FUNC') + '(' + (nexusGen.valueToCode(b, 'ARGS', 0)||'') + ')\n'; 
+        nexusGen.forBlock['nexus_io_read'] = function(b) { return ['io.read(' + (nexusGen.valueToCode(b, 'FILENAME', ORDER_NONE)||'""') + ')', ORDER_ATOMIC]; };
+        nexusGen.forBlock['nexus_generic_module'] = function(b) { 
+            return b.getFieldValue('MOD') + '.' + b.getFieldValue('FUNC') + '(' + (nexusGen.valueToCode(b, 'ARGS', ORDER_NONE)||'') + ')\n'; 
         };
-        nexusGen['nexus_comment'] = function(b) { return '# ' + b.getFieldValue('TEXT') + '\n'; };
+        nexusGen.forBlock['nexus_comment'] = function(b) { return '# ' + b.getFieldValue('TEXT') + '\n'; };
 
 
         // --- 4. INJECT WORKSPACE ---
@@ -215,9 +222,11 @@
             try {
                 const code = nexusGen.workspaceToCode(workspace);
                 document.getElementById('codeOutput').textContent = code;
+                document.getElementById('consoleOutput').innerHTML = "<span style='color:#666'>Ready...</span>";
             } catch (e) {
-                // Ignore initial loading errors
-                if(!e.toString().includes("nexus_out")) console.log(e);
+                // Zeigt jetzt den genauen Fehler an, falls etwas schief geht
+                document.getElementById('consoleOutput').innerHTML = "<span style='color:red'>Error: " + e.message + "</span>";
+                console.error(e);
             }
         }
         workspace.addChangeListener(updateCode);
@@ -247,11 +256,11 @@
                     else if (line.startsWith('io.')) log("[DISK] " + line);
                     else if (line.startsWith('input')) log("[INPUT REQUEST] " + line);
                 });
-            } catch(e) { log("<span style='color:red'>Error generating code.</span>"); }
+            } catch(e) { log("<span style='color:red'>Simulation Error: " + e.message + "</span>"); }
         });
         
         // Initial run
-        setTimeout(updateCode, 500);
+        setTimeout(updateCode, 100);
     </script>
 </body>
 </html>
