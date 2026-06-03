@@ -13,6 +13,16 @@ It also hosts a **native X11 / Win32 graphics suite** for premium styled windows
 
 ---
 
+## The Titan Advantage
+
+| Language | Execution Speed | Syntax Simplicity | Lines of Code | Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| NEXUS 3.0 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Very Low | Rapid Dev / Logic |
+| **Python 3** | ⭐ | ⭐⭐⭐⭐ | Low | Data / AI / Scripting |
+| **C++** | ⭐⭐⭐⭐ | ⭐ | Very High | Engines / Systems |
+| **Rust** | ⭐⭐⭐⭐ | ⭐⭐⭐ | High | Safety / Systems |
+| **C** | ⭐⭐⭐⭐ | ⭐ | High | Embedded / Kernel |
+
 ## 1. Quick Installation (Mac & Linux)
 
 ### Prerequisites — X11 (required for GUI features)
