@@ -17,7 +17,7 @@ It also hosts a **native X11 / Win32 graphics suite** for premium styled windows
 
 | Language | Execution Speed | Syntax Simplicity | Lines of Code | Use Case |
 | :--- | :--- | :--- | :--- | :--- |
-| NEXUS 3.0 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Very Low | Rapid Dev / Logic |
+| NEXUS 4.5. | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Very Low | Rapid Dev / Logic |
 | **Python 3** | ⭐ | ⭐⭐⭐⭐ | Low | Data / AI / Scripting |
 | **C++** | ⭐⭐⭐⭐ | ⭐ | Very High | Engines / Systems |
 | **Rust** | ⭐⭐⭐⭐ | ⭐⭐⭐ | High | Safety / Systems |
