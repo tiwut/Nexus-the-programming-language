@@ -1,6 +1,6 @@
 # Nexus Programming Language (v4.5.0)
 
-Nexus is a procedural, dynamically typed programming language built on a high-performance C++ execution engine. Version 4.5.0 features a completely **native, zero-dependency C++ network engine** utilizing **POSIX sockets and OpenSSL on Linux/macOS** and **WinINet on Windows** for synchronous HTTPS/TLS operations, completely eliminating all external `curl` shell dependencies. 
+>Nexus is a procedural, dynamically typed programming language built on a high-performance C++ execution engine. Version 4.5.0 features a completely **native, zero-dependency C++ network engine** utilizing **POSIX sockets and OpenSSL on Linux/macOS** and **WinINet on Windows** for synchronous HTTPS/TLS operations, completely eliminating all external `curl` shell dependencies. 
 
 It also hosts a **native X11 / Win32 graphics suite** for premium styled windows, button hovering animations, entry field text capturing, vector drawing canvases, and popup alerts with **zero delay**. 
 
